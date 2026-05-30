@@ -60,7 +60,7 @@ The intake module now reads and writes real Airtable data through `/api/leads` a
 ## 4. Repo layout
 
 ```
-ct-ops-platform/
+CT-ops-copilot/
   README.md                              <- you are here
   Build Plan.md                          <- source of truth: phases, specs, data contracts
   Build Plan - Backend Reference v1.md   <- preserved original backend-first plan, consumed per b-phase
@@ -90,8 +90,8 @@ ct-ops-platform/
 ## 5. Getting started
 
 ```bash
-git clone https://github.com/sapnilbhatnagar/ct-ops-platform.git
-cd ct-ops-platform/app
+git clone https://github.com/sapnilbhatnagar/CT-ops-copilot.git
+cd CT-ops-copilot/app
 
 npm install        # first checkout only
 npm run dev        # http://localhost:3000  (redirects to /intake)

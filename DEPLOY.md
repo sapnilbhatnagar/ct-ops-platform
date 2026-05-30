@@ -6,12 +6,12 @@ import (Option A) is the fastest and keeps the project under your account.
 ## Option A — Vercel dashboard (about 2 minutes)
 
 1. Go to [vercel.com/new](https://vercel.com/new) and **Import** the
-   `sapnilbhatnagar/ct-ops-platform` GitHub repo.
+   `sapnilbhatnagar/CT-ops-copilot` GitHub repo.
 2. **Root Directory:** click **Edit** and set it to **`app`**. (Vercel
    auto-detects Next.js from there.)
 3. **Environment Variables:** add the ones below (copy the secret values
    from your local `app/.env.local`).
-4. Click **Deploy**. You get a `https://ct-ops-platform-*.vercel.app` URL.
+4. Click **Deploy**. You get a `https://ct-ops-copilot-*.vercel.app` URL.
 5. Every push to `main` auto-deploys; every PR gets a preview URL.
 
 ## Option B — Vercel CLI (if you prefer the terminal)
