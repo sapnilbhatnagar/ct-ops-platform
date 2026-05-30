@@ -5,28 +5,27 @@ import { env } from "./env";
 /**
  * AISensy outbound + webhook utilities.
  *
- * STATUS: scaffold. The exact API endpoint paths, payload shapes, and
- * signature scheme below are placeholders until Phase 1b.0 audit confirms
- * them against AISensy's documentation. The function signatures here
- * (sendText, sendTemplate, parseInboundWebhook, verifyWebhookSignature)
- * are stable and what the rest of the codebase imports — only the
- * implementation bodies should change after the audit.
+ * SIM MODE (AISENSY_SIM_MODE=true):
+ *   sendText / sendTemplate log to console and return { ok: true }.
+ *   verifyWebhookSignature always returns true.
+ *   No real WhatsApp messages are sent.
+ *   Wire in real AISensy credentials to exit sim mode.
  *
- * Phase 1b.0 audit checklist (fill these in before going live):
- *   - Outbound base URL                       : ?
- *   - Outbound auth header format             : ?
- *   - Outbound text endpoint + payload schema : ?
- *   - Template send endpoint + payload schema : ?
- *   - Inbound webhook payload schema          : ?
- *   - Signature header name + algorithm       : ?  (assumed HMAC-SHA256 below)
- *   - Rate limits                             : ?
+ * PRODUCTION NOTE:
+ *   Outbound endpoint paths, payload shapes, and signature scheme below
+ *   are best-guess based on AISensy's documented API patterns. Confirm
+ *   against their dashboard / support before going live (Phase 1b.0 audit).
  */
 
 type SendResult = { ok: true; messageId?: string } | { ok: false; error: string };
 
-const AISENSY_BASE_URL = "https://backend.aisensy.com"; // PLACEHOLDER — confirm in audit
+const AISENSY_BASE_URL = "https://backend.aisensy.com";
 
 export async function sendText(phone: string, text: string): Promise<SendResult> {
+  if (env.aisensy.simMode()) {
+    console.log(`[AISensy SIM] → ${phone}: ${text.slice(0, 120)}`);
+    return { ok: true, messageId: `sim_${Date.now()}` };
+  }
   try {
     const res = await fetch(`${AISENSY_BASE_URL}/api/messages`, {
       method: "POST",
@@ -49,6 +48,10 @@ export async function sendTemplate(
   templateName: string,
   variables: Record<string, string>,
 ): Promise<SendResult> {
+  if (env.aisensy.simMode()) {
+    console.log(`[AISensy SIM] template ${templateName} → ${phone}`, variables);
+    return { ok: true, messageId: `sim_${Date.now()}` };
+  }
   try {
     const res = await fetch(`${AISENSY_BASE_URL}/api/templates`, {
       method: "POST",
@@ -66,10 +69,6 @@ export async function sendTemplate(
   }
 }
 
-/**
- * Inbound webhook payload as the audit will define it.
- * Shape below is the assumed-typical AISensy shape; revisit after audit.
- */
 export type InboundWhatsappEvent = {
   phone: string;
   messageId: string;
@@ -102,11 +101,8 @@ export function parseInboundWebhook(raw: unknown): InboundWhatsappEvent | null {
   };
 }
 
-/**
- * HMAC-SHA256 signature verification, assumed scheme.
- * Replace with AISensy's documented scheme after audit.
- */
 export function verifyWebhookSignature(signature: string | null, rawBody: string): boolean {
+  if (env.aisensy.simMode()) return true;
   if (!signature) return false;
   const expected = crypto
     .createHmac("sha256", env.aisensy.webhookSecret())

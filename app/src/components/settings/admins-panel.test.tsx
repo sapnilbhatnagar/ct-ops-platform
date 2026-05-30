@@ -1,7 +1,20 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AdminsPanel } from "./admins-panel";
+import { MOCK_ADMINS } from "@/lib/mock/admins";
+
+// Mock fetch so useAdmins gets mock data instead of hitting a real server.
+// The hook caches after the first load, so subsequent tests render immediately.
+beforeEach(() => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => MOCK_ADMINS,
+    }),
+  );
+});
 
 describe("AdminsPanel", () => {
   it("renders the seeded admins after load", async () => {

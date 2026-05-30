@@ -1,68 +1,99 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Admin } from "@/lib/types";
-import { MOCK_ADMINS } from "@/lib/mock/admins";
 
 type AdminsState = {
   admins: Admin[];
   loading: boolean;
+  error: string | null;
 };
 
-const MOCK_LATENCY_MS = 150;
-
-let _state: Admin[] = [...MOCK_ADMINS];
+let _cache: Admin[] | null = null;
 const _subscribers = new Set<(next: Admin[]) => void>();
-function publish() {
-  for (const s of _subscribers) s([..._state]);
+
+function publish(next: Admin[]) {
+  _cache = next;
+  for (const s of _subscribers) s([...next]);
+}
+
+async function fetchAdmins(): Promise<Admin[]> {
+  const res = await fetch("/api/admins");
+  if (!res.ok) throw new Error(`/api/admins returned ${res.status}`);
+  return res.json() as Promise<Admin[]>;
 }
 
 export function useAdmins(): AdminsState & {
-  addAdmin: (input: { name: string; email: string }) => void;
-  removeAdmin: (id: string) => void;
+  addAdmin: (input: { name: string; email: string }) => Promise<void>;
+  removeAdmin: (id: string) => Promise<void>;
 } {
-  const [admins, setAdmins] = useState<Admin[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [admins, setAdmins] = useState<Admin[]>(_cache ?? []);
+  const [loading, setLoading] = useState(_cache === null);
+  const [error, setError] = useState<string | null>(null);
+  const mounted = useRef(true);
 
   useEffect(() => {
-    const id = setTimeout(() => {
-      setAdmins([..._state]);
-      setLoading(false);
-    }, MOCK_LATENCY_MS);
-    const onChange = (next: Admin[]) => setAdmins(next);
+    mounted.current = true;
+    const onChange = (next: Admin[]) => {
+      if (mounted.current) setAdmins(next);
+    };
     _subscribers.add(onChange);
+
+    if (_cache === null) {
+      fetchAdmins()
+        .then((data) => {
+          publish(data);
+          if (mounted.current) setLoading(false);
+        })
+        .catch((e: unknown) => {
+          if (mounted.current) {
+            setError(e instanceof Error ? e.message : "Failed to load admins");
+            setLoading(false);
+          }
+        });
+    }
+
     return () => {
-      clearTimeout(id);
+      mounted.current = false;
       _subscribers.delete(onChange);
     };
   }, []);
 
-  const addAdmin = useCallback(({ name, email }: { name: string; email: string }) => {
-    const initials = name
-      .split(/\s+/)
-      .map((p) => p[0]?.toUpperCase() ?? "")
-      .join("")
-      .slice(0, 2) || "??";
-    const palette = ["#C8553D", "#5A8F5A", "#9DB4C0", "#E8A87C", "#6B6B6B"];
-    const color = palette[_state.length % palette.length];
-    const next: Admin = {
-      id: `admin_${Date.now()}`,
-      name,
-      email,
-      initials,
-      color,
-      active: true,
-    };
-    _state = [..._state, next];
-    publish();
+  const addAdmin = useCallback(async ({ name, email }: { name: string; email: string }) => {
+    const res = await fetch("/api/admins", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email }),
+    });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(body.error ?? "Failed to add admin");
+    }
+    const newAdmin = (await res.json()) as Admin;
+    // In mock mode the API returns {ok:true} not an Admin; fall back gracefully
+    if (newAdmin && "id" in newAdmin) {
+      publish([...(_cache ?? []), newAdmin]);
+    } else {
+      // Refresh from server
+      const data = await fetchAdmins();
+      publish(data);
+    }
   }, []);
 
-  const removeAdmin = useCallback((id: string) => {
-    _state = _state.filter((a) => a.id !== id);
-    publish();
+  const removeAdmin = useCallback(async (id: string) => {
+    // Optimistic
+    if (_cache) publish(_cache.filter((a) => a.id !== id));
+    try {
+      await fetch(`/api/admins/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.error("[useAdmins] removeAdmin failed:", e);
+      // Revert on failure
+      const data = await fetchAdmins();
+      publish(data);
+    }
   }, []);
 
-  return { admins, loading, addAdmin, removeAdmin };
+  return { admins, loading, error, addAdmin, removeAdmin };
 }
 
 export function findAdmin(admins: Admin[], id: string | null): Admin | null {

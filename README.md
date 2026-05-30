@@ -28,10 +28,10 @@ This is a **UI-first** build. Every module ships its visual layer on mock data f
 | App shell + design system | Done. Operational sidebar: Intake, Leads, Trips, Community, Settings. |
 | Intake module (visual) | Done. Lead list with filters and pagination, conversation viewer, live AI extraction panel, classification badge with model-vs-user override, assignment controls, hot-lead alert. |
 | Settings / Admins (visual) | Done. Add and remove admins with validation. |
-| Backend (intake) | Scaffolded, not live. Server wrappers exist in `app/src/lib/server/` (Anthropic, Airtable, AISensy, Langfuse, env, phone). Awaiting credentials and an AISensy capability audit, see `SETUP.md`. |
+| **Backend (intake)** | **Live and verified end to end.** A WhatsApp message (or the sim endpoint) runs the Claude Sonnet 4.6 intake agent, extracts the five fields, classifies hot/warm/cold, writes the lead to Airtable, fires a hot-lead notification, and traces every turn to Langfuse. Runs today in **sim mode** (no WhatsApp key needed); flip one env flag to go fully live. |
 | Leads / Trips / Community modules | Visual not started. Empty pages with narrative copy in place. |
 
-Everything you can click today runs on mock data behind hooks (`useLeads`, `useAdmins`). The hook body is the single swap point: flip it from mock to `fetch` and the components do not change.
+The intake module now reads and writes real Airtable data through `/api/leads` and `/api/admins`. The hooks (`useLeads`, `useAdmins`) fetch from those routes and fall back to mock data when Airtable is not configured, so the UI runs with or without credentials. WhatsApp send/receive is stubbed by `AISENSY_SIM_MODE` until the AISensy key arrives.
 
 ---
 
@@ -46,7 +46,7 @@ Everything you can click today runs on mock data behind hooks (`useLeads`, `useA
 | Tests | Vitest + React Testing Library | Behavior tests, TDD. Red, green, refactor. |
 | Animation | Framer Motion | Function-first only. |
 | LLM | Claude Sonnet 4.6 via `@anthropic-ai/sdk` | Intake extraction and re-engagement copy. |
-| WhatsApp | AISensy (Meta Cloud API as fallback) | Capability audit pending, see `SETUP.md` §3. |
+| WhatsApp | AISensy (Meta Cloud API as fallback) | Send/receive stubbed by `AISENSY_SIM_MODE` until the key arrives; test via `POST /api/dev/simulate-message`. Capability audit pending, see `SETUP.md` §3. |
 | Lead DB | Airtable | Migration trigger to Postgres noted in the Build Plan. |
 | Observability | Langfuse Cloud (free tier) | Traces every LLM call. |
 | Deploy | Vercel | Frontend and API together. Root directory set to `app/`. |
@@ -106,7 +106,19 @@ Production build check:
 npm run build
 ```
 
-You do **not** need any API keys to run the UI. The app runs fully on mock data until the backend is wired. When you are ready to go live, copy `app/env.example` to `app/.env.local` and follow `SETUP.md`.
+You do **not** need any API keys to run the UI. Without `app/.env.local` it serves mock data. With credentials in place (`ANTHROPIC_API_KEY`, `AIRTABLE_API_KEY`, `AIRTABLE_BASE_ID`, Langfuse keys) the intake module is fully live. Copy `app/env.example` to `app/.env.local` and follow `SETUP.md`.
+
+### Testing the intake agent without WhatsApp
+
+While `AISENSY_SIM_MODE=true`, simulate an inbound WhatsApp message end to end:
+
+```bash
+curl -X POST http://localhost:3000/api/dev/simulate-message \
+  -H "Content-Type: application/json" \
+  -d '{"phone":"919876543210","text":"Hi, interested in your Rajasthan trip"}'
+```
+
+This runs the Claude agent, writes/updates the lead in Airtable, fires the hot-lead notification (logged to the dev console in sim mode), and traces the turn to Langfuse. Send several messages from the same `phone` to advance one conversation and watch the classification move cold → warm → hot.
 
 ---
 
@@ -120,9 +132,9 @@ You do **not** need any API keys to run the UI. The app runs fully on mock data 
 |---|---|---|---|
 | 0 | Visual foundation: scaffold, tokens, app shell | UI | Done |
 | 1a | Lead intake, visual | UI | Done |
-| 1b | Lead intake, backend (Claude + AISensy + Airtable + Langfuse) | API | In progress, awaiting credentials + AISensy audit |
-| 2a | Leads dashboard, visual | UI | Next |
-| 2b | Leads dashboard, backend | API | Blocked on 2a + 1b |
+| 1b | Lead intake, backend (Claude + Airtable + Langfuse) | API | **Done and live in sim mode.** Anthropic + Airtable + Langfuse wired and verified end to end. Real WhatsApp send/receive waits on the AISensy key (sim mode bridges the gap). |
+| 2a | Leads dashboard, visual | UI | **Next** |
+| 2b | Leads dashboard, backend | API | Blocked on 2a |
 | 3a | Trips and re-engagement, visual | UI | Blocked on 2a |
 | 3b | Trips and re-engagement, backend | API | Blocked on 3a + 2b |
 | 4a | Community and referral, visual | UI | Blocked on 3a |

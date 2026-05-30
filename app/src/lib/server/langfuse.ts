@@ -16,7 +16,10 @@ function client(): Langfuse {
 
 /**
  * Start a session-scoped trace for a single conversation turn.
- * Session ID is SHA-256 of the lead's phone (never raw phone in traces).
+ * sessionId and userId are both the phone hash — sessionId groups turns
+ * into a conversation view; userId enables per-lead cost attribution.
+ * The "intake" tag lets you filter all intake traces in the Langfuse UI.
+ * Never pass raw phone numbers.
  */
 export function startTurnTrace(args: {
   sessionId: string;
@@ -26,6 +29,8 @@ export function startTurnTrace(args: {
   return client().trace({
     name: args.name,
     sessionId: args.sessionId,
+    userId: args.sessionId,
+    tags: ["intake"],
     metadata: args.metadata,
   });
 }

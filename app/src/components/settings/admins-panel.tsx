@@ -11,7 +11,7 @@ export function AdminsPanel() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !email.trim()) {
       setError("Name and email are both required.");
@@ -25,10 +25,14 @@ export function AdminsPanel() {
       setError("Someone with that email is already on the team.");
       return;
     }
-    addAdmin({ name: name.trim(), email: email.trim() });
-    setName("");
-    setEmail("");
-    setError(null);
+    try {
+      await addAdmin({ name: name.trim(), email: email.trim() });
+      setName("");
+      setEmail("");
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add admin.");
+    }
   }
 
   return (
