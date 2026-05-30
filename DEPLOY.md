@@ -1,5 +1,20 @@
 # Deploy to Vercel
 
+**Live:** https://ct-ops-copilot.vercel.app — deployed via CLI on 2026-05-30.
+
+The Vercel project `ct-ops-copilot` is already configured:
+- **Framework:** Next.js · **Root Directory:** `app`
+- All 13 production env vars set (Anthropic, Airtable, Langfuse, sim-mode flags)
+- Deployment Protection is **off** so the link is public for the client
+
+To ship a new production build: `cd` to the repo root and run `vercel deploy --prod`.
+(Re-run from the repo root, not `app/`, because the CLI uploads the git root and
+applies the `app` Root Directory setting.)
+
+---
+
+The notes below are the original from-scratch setup, kept for reference.
+
 The app lives in the `app/` subfolder. Two ways to ship it. The dashboard
 import (Option A) is the fastest and keeps the project under your account.
 
