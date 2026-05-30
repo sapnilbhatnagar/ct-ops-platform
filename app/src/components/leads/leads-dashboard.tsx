@@ -7,6 +7,7 @@ import { useAdmins } from "@/lib/hooks/use-admins";
 import { LeadTable } from "./lead-table";
 import { LeadsFilterBar } from "./leads-filter-bar";
 import { LeadDetailDrawer } from "./lead-detail-drawer";
+import { LeadStats } from "./lead-stats";
 import { SkeletonRows } from "@/components/ui/skeleton";
 import {
   filterLeads,
@@ -55,6 +56,10 @@ export function LeadsDashboard() {
           <div className="text-[12px] tabular-nums text-mute" data-testid="leads-count">
             {loading ? "—" : `${visible.length} of ${leads.length}`}
           </div>
+        </div>
+
+        <div className="px-8 pb-4">
+          <LeadStats leads={leads} loading={loading} />
         </div>
 
         <div className="min-h-0 flex-1 px-8 pb-8">

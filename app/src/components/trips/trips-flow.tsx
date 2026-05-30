@@ -130,7 +130,7 @@ export function TripsFlow() {
             <button
               type="button"
               onClick={reset}
-              className="mt-6 inline-flex items-center rounded-full border border-ink px-4 py-2 text-[12.5px] font-medium text-ink transition-colors hover:bg-ink hover:text-paper"
+              className="mt-6 inline-flex items-center rounded-full border border-accent px-4 py-2 text-[12.5px] font-medium text-accent transition-colors hover:bg-accent hover:text-white"
             >
               Plan another trip
             </button>

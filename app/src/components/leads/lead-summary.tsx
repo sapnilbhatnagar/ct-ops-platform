@@ -48,7 +48,7 @@ export function LeadSummary({ leadId, messages }: { leadId: string; messages: Me
   if (messages.length === 0 || failed) return null;
 
   return (
-    <div data-testid="lead-summary" className="tile mx-6 mt-5 p-4">
+    <div data-testid="lead-summary" className="tile-blue-soft mx-6 mt-5 p-4">
       <div className="mb-2 flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-mute">
         <Sparkles className="size-3 text-accent" />
         AI summary

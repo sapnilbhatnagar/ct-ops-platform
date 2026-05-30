@@ -120,7 +120,7 @@ export function AdminsPanel() {
             <button
               type="submit"
               data-testid="admin-submit"
-              className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-1.5 text-[12.5px] font-medium text-paper transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-1.5 text-[12.5px] font-medium text-white transition-opacity hover:opacity-90"
             >
               <UserPlus className="size-3.5" />
               Add admin

@@ -2,7 +2,7 @@
 
 Plain-English status for anyone joining the project. Updated after every PR merge.
 
-**Last updated:** 2026-05-30 (after PR #8)
+**Last updated:** 2026-05-30 (after PR #10)
 **Live demo:** https://ct-ops-copilot.vercel.app (real Airtable + Claude; WhatsApp in sim mode).
 
 ---

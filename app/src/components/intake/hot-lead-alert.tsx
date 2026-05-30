@@ -21,12 +21,12 @@ export function HotLeadAlert({ lead }: { lead: Lead }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25 }}
-          className="flex items-center gap-3 border-b border-accent/20 bg-accent/8 px-8 py-3"
+          className="flex items-center gap-3 border-b border-hot/20 bg-hot/8 px-8 py-3"
         >
-          <Flame className="size-4 shrink-0 text-accent" />
+          <Flame className="size-4 shrink-0 text-hot" />
           <div className="flex-1 text-[13px] text-ink">
             <span className="font-medium">Hot lead</span>{" "}
-            <span className="text-mute">— agent notified at {formatTime(lead.agentNotifiedAt!)}</span>
+            <span className="text-mute">· agent notified at {formatTime(lead.agentNotifiedAt!)}</span>
           </div>
         </motion.div>
       ) : null}

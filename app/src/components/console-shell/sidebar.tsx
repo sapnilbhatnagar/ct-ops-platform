@@ -57,16 +57,15 @@ export function Sidebar() {
   return (
     <aside
       data-testid="console-sidebar"
-      className="glass-dark sticky top-0 flex h-dvh w-60 shrink-0 flex-col text-sidebar-fg"
+      className="glass-dark sticky top-0 flex h-dvh w-60 shrink-0 flex-col text-ink"
     >
-      <div className="px-5 pt-7 pb-9">
-        <div className="font-display text-[18px] leading-tight tracking-tight">
-          Connecting
-          <br />
-          Traveller
+      <div className="flex items-center gap-2.5 px-5 pt-6 pb-8">
+        <div className="flex size-8 items-center justify-center rounded-[10px] bg-accent text-[15px] font-semibold text-white shadow-[var(--shadow-blue)]">
+          C
         </div>
-        <div className="mt-1 text-[11px] uppercase tracking-[0.18em] text-sidebar-fg-mute">
-          Ops Console
+        <div className="leading-tight">
+          <div className="text-[13.5px] font-semibold tracking-tight text-ink">Connecting Traveller</div>
+          <div className="text-[10.5px] uppercase tracking-[0.16em] text-mute">Ops Console</div>
         </div>
       </div>
 
@@ -81,13 +80,13 @@ export function Sidebar() {
                   href={item.href}
                   data-active={active}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition-colors",
+                    "flex items-center gap-3 rounded-[11px] px-3 py-2 text-[13.5px] transition-colors",
                     active
-                      ? "bg-white/12 text-sidebar-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-                      : "text-sidebar-fg-mute hover:bg-white/[0.07] hover:text-sidebar-fg",
+                      ? "bg-accent font-medium text-white shadow-[var(--shadow-blue)]"
+                      : "text-ink-soft hover:bg-canvas hover:text-ink",
                   )}
                 >
-                  <Icon className={cn("size-4 shrink-0", active ? "text-accent" : "")} />
+                  <Icon className="size-4 shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               </li>
@@ -96,9 +95,7 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      <div className="border-t border-white/5 px-5 py-4 text-[11px] text-sidebar-fg-mute">
-        v0.1 · localhost
-      </div>
+      <div className="border-t border-rule px-5 py-4 text-[11px] text-mute">v0.1 · sim mode</div>
     </aside>
   );
 }

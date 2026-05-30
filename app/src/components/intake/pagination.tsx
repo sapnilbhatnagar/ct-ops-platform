@@ -54,7 +54,7 @@ export function Pagination({
               onClick={() => onPageChange(p)}
               className={cn(
                 "inline-flex size-6 items-center justify-center rounded text-[11px] tabular-nums transition-colors",
-                p === page ? "bg-ink text-paper" : "text-mute hover:bg-rule/40 hover:text-ink",
+                p === page ? "bg-accent text-white" : "text-mute hover:bg-rule/40 hover:text-ink",
               )}
             >
               {p}

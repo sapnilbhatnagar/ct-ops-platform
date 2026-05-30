@@ -140,7 +140,7 @@ export function TripForm({ onSubmit }: { onSubmit: (trip: Trip) => void }) {
         <button
           type="submit"
           data-testid="trip-submit"
-          className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2 text-[13px] font-medium text-paper transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
         >
           <Send className="size-3.5" />
           Find matching leads

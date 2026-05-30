@@ -39,7 +39,7 @@ export function CommunityView() {
               onClick={() => setTab(t.id)}
               className={cn(
                 "rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors",
-                tab === t.id ? "bg-ink text-paper" : "text-mute hover:text-ink",
+                tab === t.id ? "bg-accent text-white" : "text-mute hover:text-ink",
               )}
             >
               {t.label}

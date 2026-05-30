@@ -12,7 +12,7 @@ const INVITE_LABEL: Record<InviteStatus, string> = {
 
 const INVITE_TONE: Record<InviteStatus, string> = {
   joined: "bg-ok/15 text-ok",
-  invited: "bg-cool/25 text-ink",
+  invited: "bg-accent-quiet text-accent-ink",
   not_invited: "bg-rule text-mute",
 };
 

@@ -142,7 +142,7 @@ export function IntakeConsole() {
                       type="button"
                       onClick={() => advanceConversation(selectedLead.id)}
                       data-testid="advance-conversation"
-                      className="inline-flex items-center gap-2 rounded-full border border-ink bg-ink px-3.5 py-1.5 text-[12px] text-paper transition-opacity hover:opacity-90"
+                      className="inline-flex items-center gap-2 rounded-full border border-accent bg-accent px-3.5 py-1.5 text-[12px] text-white transition-opacity hover:opacity-90"
                     >
                       <Play className="size-3" />
                       Simulate next message

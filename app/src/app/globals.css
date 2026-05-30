@@ -1,119 +1,141 @@
 @import "tailwindcss";
 
 /*
- * Connecting Traveller Ops — material design system.
- * Warm, Apple-grade light interface: frosted "liquid glass" on chrome
- * (sidebar, top bar, sheets, sticky bars), opaque tiles for content,
- * a single terracotta accent. Glass is used on chrome only, never over
- * dense data, so tables stay crisp.
+ * Connecting Traveller Ops — Apple light design system.
+ * Near-white cool-tinted canvas, white content cards with soft diffuse
+ * depth, systemBlue accent, blue used on feature tiles + primary actions +
+ * selection only. Sans-only. Data surfaces stay crisp and legible.
  */
 :root {
-  --ink: #0E1014;
-  --ink-soft: #36383D;
-  --paper: #FAFAF7;
-  --canvas: #EFECE4; /* base behind glass, a touch deeper than paper */
-  --tile: #FCFBF9; /* content tile surface */
-  --panel: #F2F0E9; /* opaque second layer: intake rails */
-  --mute: #6B6B6B;
-  --rule: #E7E4DD;
-  --accent: #C8553D;
-  --accent-quiet: #F4E3DD;
-  --warm: #E8A87C;
-  --cool: #9DB4C0;
-  --ok: #5A8F5A;
+  /* Neutrals, tinted faintly cool toward the blue hue (never pure black/white) */
+  --ink: #1C1D21;
+  --ink-soft: #51535B;
+  --canvas: #F4F6FA; /* app background */
+  --tile: #FFFFFF; /* content cards */
+  --panel: #FBFCFE; /* light chrome (sidebar, sticky headers) */
+  --mute: #80838C;
+  --rule: #E6E8EE;
 
-  --sidebar-fg: #E8E6E0;
-  --sidebar-fg-mute: #8E8B86;
+  /* systemBlue accent */
+  --accent: #0071E3;
+  --accent-hover: #0A84FF;
+  --accent-quiet: #EAF2FE; /* light blue tile fill */
+  --accent-ink: #0A5BC4; /* readable blue text on light blue */
 
-  --shadow-tile: 0 1px 2px rgba(24, 20, 16, 0.04), 0 12px 28px -14px rgba(24, 20, 16, 0.18);
-  --shadow-float: 0 1px 2px rgba(24, 20, 16, 0.05), 0 24px 60px -20px rgba(24, 20, 16, 0.28);
+  /* Semantic classification + status (kept distinct from the accent) */
+  --hot: #FF3B30;
+  --warm: #FF9500;
+  --cold: #8E9099;
+  --ok: #34C759;
+
+  --shadow-tile: 0 1px 2px rgba(20, 28, 50, 0.05), 0 12px 28px -14px rgba(20, 28, 50, 0.16);
+  --shadow-float: 0 2px 6px rgba(20, 28, 50, 0.06), 0 28px 64px -22px rgba(20, 28, 50, 0.32);
+  --shadow-blue: 0 10px 28px -10px rgba(0, 113, 227, 0.5);
 }
 
 @theme inline {
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
-  --color-paper: var(--paper);
   --color-canvas: var(--canvas);
+  --color-paper: var(--tile);
   --color-tile: var(--tile);
   --color-panel: var(--panel);
   --color-mute: var(--mute);
   --color-rule: var(--rule);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-quiet: var(--accent-quiet);
+  --color-accent-ink: var(--accent-ink);
+  --color-hot: var(--hot);
   --color-warm: var(--warm);
-  --color-cool: var(--cool);
+  --color-cold: var(--cold);
   --color-ok: var(--ok);
-  --color-sidebar-fg: var(--sidebar-fg);
-  --color-sidebar-fg-mute: var(--sidebar-fg-mute);
 
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
 
+  /* Sans-only: display headings use the same family, just heavier + tighter. */
   --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-display: var(--font-inter), system-ui, sans-serif;
 }
 
 html {
   background: var(--canvas);
 }
 
-/* Soft warm ambient backdrop so the glass layers have something to refract. */
 body {
   min-height: 100dvh;
   color: var(--ink);
+  background: var(--canvas);
   font-family: var(--font-sans);
   font-feature-settings: "ss01", "cv11";
-  background:
-    radial-gradient(1200px 760px at 8% -10%, color-mix(in oklab, var(--accent) 13%, transparent), transparent 58%),
-    radial-gradient(1100px 820px at 108% 6%, color-mix(in oklab, var(--cool) 18%, transparent), transparent 55%),
-    var(--canvas);
-  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Display headings: bold, tight, Apple large-title feel. */
+.font-display {
+  font-weight: 600;
+  letter-spacing: -0.022em;
 }
 
 ::selection {
   background: var(--accent);
-  color: var(--paper);
+  color: #fff;
 }
 
 *:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 /* ── Materials ─────────────────────────────────────────────────────────── */
 
-/* Frosted chrome: top bars, sticky action bars, pills. Translucent. */
+/* Light chrome: top bar, sidebar, sticky bars, menus. Subtle vibrancy. */
 .glass {
-  background: color-mix(in oklab, var(--paper) 58%, transparent);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  border: 1px solid color-mix(in oklab, white 55%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in oklab, white 70%, transparent);
+  background: color-mix(in oklab, var(--panel) 78%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--rule);
 }
 
-/* Stronger frost where content sits on top (sheets/drawers): keeps text crisp. */
+/* Sheets/drawers: near-solid white. */
 .glass-strong {
-  background: color-mix(in oklab, var(--paper) 86%, transparent);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  box-shadow: var(--shadow-float), inset 0 1px 0 color-mix(in oklab, white 70%, transparent);
+  background: color-mix(in oklab, var(--tile) 94%, transparent);
+  backdrop-filter: blur(24px) saturate(130%);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+  box-shadow: var(--shadow-float);
 }
 
-/* Dark vibrancy for the sidebar. */
+/* Light sidebar surface (was dark). */
 .glass-dark {
-  background: color-mix(in oklab, var(--ink) 76%, transparent);
-  backdrop-filter: blur(26px) saturate(160%);
-  -webkit-backdrop-filter: blur(26px) saturate(160%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in oklab, var(--panel) 82%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-right: 1px solid var(--rule);
 }
 
-/* Opaque content tile with soft, diffuse elevation. */
+/* White content tile with soft diffuse depth. */
 .tile {
   background: var(--tile);
   border: 1px solid var(--rule);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-tile);
+}
+
+/* Filled systemBlue feature tile (stat highlights, primary surfaces). */
+.tile-blue {
+  background: linear-gradient(180deg, #1a86f0 0%, var(--accent) 100%);
+  color: #fff;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-blue);
+}
+
+/* Light blue tinted tile (AI summary, soft highlights). */
+.tile-blue-soft {
+  background: var(--accent-quiet);
+  border: 1px solid color-mix(in oklab, var(--accent) 16%, transparent);
+  border-radius: var(--radius-2xl);
 }
 
 /* ── Skeleton loading ──────────────────────────────────────────────────── */

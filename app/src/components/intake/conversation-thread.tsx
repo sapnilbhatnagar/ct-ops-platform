@@ -18,12 +18,12 @@ function MessageBubble({ message }: { message: Message }) {
       data-testid={`message-${message.id}`}
       data-role={message.role}
       data-type={message.type}
-      className={cn("flex w-full", isUser ? "justify-end" : "justify-start")}
+      className={cn("flex w-full", isUser ? "justify-start" : "justify-end")}
     >
       <div
         className={cn(
           "max-w-[78%] rounded-2xl px-4 py-2.5 text-[14.5px] leading-relaxed",
-          isUser ? "bg-ink text-paper" : "border border-rule bg-paper text-ink",
+          isUser ? "border border-rule bg-tile text-ink" : "bg-accent text-white",
           isUnsupported && "flex items-center gap-2 italic text-mute",
         )}
       >

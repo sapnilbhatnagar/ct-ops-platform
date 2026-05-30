@@ -9,9 +9,9 @@ const LABEL: Record<Classification, string> = {
 };
 
 const TONE: Record<Classification, string> = {
-  hot: "bg-accent text-paper",
-  warm: "bg-warm text-ink",
-  cold: "bg-cool text-ink",
+  hot: "bg-hot text-white",
+  warm: "bg-warm text-white",
+  cold: "bg-cold text-white",
   unclassified: "bg-rule text-mute",
 };
 

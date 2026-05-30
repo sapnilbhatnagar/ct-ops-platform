@@ -42,7 +42,7 @@ export function FilterBar({
               className={cn(
                 "rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors",
                 active
-                  ? "bg-ink text-paper"
+                  ? "bg-accent text-white"
                   : "border border-rule bg-paper text-mute hover:text-ink",
               )}
             >
@@ -61,7 +61,7 @@ export function FilterBar({
           className={cn(
             "rounded-full px-2.5 py-1 text-[11px] transition-colors",
             assigneeFilter === "all"
-              ? "border border-ink bg-paper text-ink"
+              ? "border border-accent bg-accent-quiet text-accent-ink"
               : "border border-rule bg-paper text-mute hover:text-ink",
           )}
         >
@@ -75,7 +75,7 @@ export function FilterBar({
           className={cn(
             "rounded-full px-2.5 py-1 text-[11px] transition-colors",
             assigneeFilter === "unassigned"
-              ? "border border-ink bg-paper text-ink"
+              ? "border border-accent bg-accent-quiet text-accent-ink"
               : "border border-rule bg-paper text-mute hover:text-ink",
           )}
         >
@@ -93,7 +93,7 @@ export function FilterBar({
                 onClick={() => onAssigneeFilter(a.id)}
                 className={cn(
                   "rounded-full p-0.5 transition-all",
-                  active ? "ring-2 ring-ink ring-offset-1 ring-offset-paper" : "opacity-70 hover:opacity-100",
+                  active ? "ring-2 ring-accent ring-offset-1 ring-offset-paper" : "opacity-70 hover:opacity-100",
                 )}
                 title={`Filter to ${a.name}`}
               >

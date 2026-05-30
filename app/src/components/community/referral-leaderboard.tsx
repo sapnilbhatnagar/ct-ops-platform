@@ -25,7 +25,7 @@ function RankRow({ referrer, rank }: { referrer: Referrer; rank: number }) {
       <div className="hidden w-40 sm:block">
         <div className="h-1.5 overflow-hidden rounded-full bg-rule">
           <div
-            className={cn("h-full rounded-full", leader ? "bg-accent" : "bg-cool")}
+            className={cn("h-full rounded-full", leader ? "bg-accent" : "bg-cold")}
             style={{ width: `${Math.round(rate * 100)}%` }}
           />
         </div>

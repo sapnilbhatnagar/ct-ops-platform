@@ -51,7 +51,7 @@ export function LeadsFilterBar({
               onClick={() => toggleClassification(chip.value)}
               className={cn(
                 "rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
-                active ? "bg-ink text-paper" : "border border-rule bg-paper text-mute hover:text-ink",
+                active ? "bg-accent text-white" : "border border-rule bg-paper text-mute hover:text-ink",
               )}
             >
               {chip.label}
