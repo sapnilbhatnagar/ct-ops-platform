@@ -128,10 +128,14 @@ export async function runIntakeAgent(input: IntakeAgentInput): Promise<IntakeAge
     max_tokens: 800,
   });
 
-  const text = response.content
+  const rawText = response.content
     .filter((b): b is Anthropic.TextBlock => b.type === "text")
     .map((b) => b.text)
     .join("");
+
+  // Strip markdown code fences if Claude wraps the JSON in ```json ... ```
+  const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  const text = fenceMatch ? fenceMatch[1] : rawText.trim();
 
   let parsed: {
     reply: string;
@@ -144,11 +148,11 @@ export async function runIntakeAgent(input: IntakeAgentInput): Promise<IntakeAge
     parsed = JSON.parse(text);
   } catch (e) {
     generation.end({
-      output: text,
+      output: rawText,
       level: "ERROR",
       statusMessage: "Claude did not return valid JSON",
     });
-    throw new Error(`Intake agent returned non-JSON: ${text.slice(0, 200)}`);
+    throw new Error(`Intake agent returned non-JSON: ${rawText.slice(0, 200)}`);
   }
 
   const turnIndex = input.history.length + 1;

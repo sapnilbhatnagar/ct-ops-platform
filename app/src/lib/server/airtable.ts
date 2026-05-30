@@ -68,7 +68,7 @@ export async function createLead(lead: Lead): Promise<string> {
     [F.language]: lead.language,
     [F.startedAt]: lead.startedAt,
     [F.lastActivityAt]: lead.lastActivityAt,
-    [F.agentNotifiedAt]: lead.agentNotifiedAt ?? "",
+    ...(lead.agentNotifiedAt ? { [F.agentNotifiedAt]: lead.agentNotifiedAt } : {}),
     [F.messagesJson]: JSON.stringify(lead.messages),
     [F.fieldsJson]: JSON.stringify(lead.extractedFields),
   });
