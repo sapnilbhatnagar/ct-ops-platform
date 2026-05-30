@@ -2,7 +2,7 @@
 
 Plain-English status for anyone joining the project. Updated after every PR merge.
 
-**Last updated:** 2026-05-30 (after PR #6)
+**Last updated:** 2026-05-30 (after PR #7)
 **Live demo:** pending first deploy — see [`DEPLOY.md`](./DEPLOY.md) (2-minute Vercel import).
 
 ---
@@ -14,7 +14,7 @@ A web console for Connecting Traveller (a travel business) that catches every Wh
 ## What's working live right now
 
 - **The AI intake pipeline.** A WhatsApp message comes in, Claude (Anthropic) chats with the lead, pulls out the five things we need (name, destination, dates, group size, budget), decides if they're hot/warm/cold, saves them to our Airtable database, and pings the sales team if it's hot. Every step is logged to Langfuse so we can see what the AI did. This runs today without a real WhatsApp connection using a "simulate message" test button, because the WhatsApp provider key isn't available yet.
-- **The Leads dashboard** reads the real Airtable data: a sortable, filterable table of every lead, with a side panel to read the conversation and reassign or re-tag a lead.
+- **The Leads dashboard** reads the real Airtable data: a sortable, filterable table of every lead, with a side panel to read the conversation and reassign or re-tag a lead. Opening a lead now shows a one-line **AI summary and a suggested next action** (Claude, traced in Langfuse).
 - **Trips re-engagement** now runs on the real backend: enter a new trip and it matches every stored lead, and Claude writes a personalised WhatsApp message for each match (traced in Langfuse). The "send" goes through sim mode until the WhatsApp key arrives.
 
 ## What's built and looks real, but runs on sample data

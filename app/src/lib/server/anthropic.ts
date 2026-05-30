@@ -180,6 +180,67 @@ export async function runIntakeAgent(input: IntakeAgentInput): Promise<IntakeAge
 // Re-export so other modules can build labels without importing two places.
 export { FIELD_LABELS };
 
+const SUMMARY_SYSTEM = `You help a travel sales agent triage WhatsApp lead conversations for Connecting Traveller.
+
+Given a transcript, return STRICT JSON only (no prose, no code fences):
+{
+  "summary": "one sentence capturing who the lead is and what they want",
+  "nextAction": "the single most useful next step for the agent, imperative and specific"
+}
+
+Keep both fields under 140 characters. Be concrete, never generic.`;
+
+/**
+ * One-sentence summary + suggested next action for a lead conversation.
+ * Traced to Langfuse under the "summary" tag. Returns null on failure.
+ */
+export async function summarizeConversation(args: {
+  leadId: string;
+  transcript: string;
+}): Promise<{ summary: string; nextAction: string } | null> {
+  const trace = startTrace({
+    name: "lead-summary",
+    sessionId: args.leadId,
+    userId: args.leadId,
+    tags: ["summary"],
+  });
+  const generation = trace.generation({
+    name: "claude-summary",
+    model: env.anthropic.model(),
+    input: args.transcript,
+  });
+  try {
+    const response = await client().messages.create({
+      model: env.anthropic.model(),
+      system: SUMMARY_SYSTEM,
+      max_tokens: 200,
+      messages: [{ role: "user", content: args.transcript }],
+    });
+    const text = response.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("")
+      .trim();
+    const fence = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    const parsed = JSON.parse(fence ? fence[1] : text) as {
+      summary: string;
+      nextAction: string;
+    };
+    generation.end({
+      output: parsed,
+      usage: { input: response.usage.input_tokens, output: response.usage.output_tokens },
+    });
+    return parsed;
+  } catch (e) {
+    generation.end({
+      output: e instanceof Error ? e.message : String(e),
+      level: "ERROR",
+      statusMessage: "summary failed",
+    });
+    return null;
+  }
+}
+
 const REENGAGE_SYSTEM = `You write short, warm WhatsApp re-engagement messages for Connecting Traveller, a small-group travel company in India.
 
 You are messaging a past lead who enquired before but did not book, to tell them about a new trip that fits what they wanted.

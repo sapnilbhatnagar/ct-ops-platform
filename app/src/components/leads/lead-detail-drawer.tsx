@@ -6,6 +6,7 @@ import { ClassificationControl } from "@/components/intake/classification-contro
 import { AssignmentControl } from "@/components/intake/assignment-control";
 import { ExtractionPanel } from "@/components/intake/extraction-panel";
 import { HotLeadAlert } from "@/components/intake/hot-lead-alert";
+import { LeadSummary } from "./lead-summary";
 import type { Lead, Admin } from "@/lib/types";
 
 export function LeadDetailDrawer({
@@ -51,6 +52,7 @@ export function LeadDetailDrawer({
 
           <div className="flex min-h-0 flex-1">
             <div className="min-w-0 flex-1 overflow-y-auto">
+              <LeadSummary key={lead.id} leadId={lead.id} messages={lead.messages} />
               {lead.messages.length > 0 ? (
                 <ConversationThread messages={lead.messages} />
               ) : (
