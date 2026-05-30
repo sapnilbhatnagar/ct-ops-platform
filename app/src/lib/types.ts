@@ -8,7 +8,9 @@ export type FieldKey =
   | "budget";
 
 export type ExtractedField = {
-  key: FieldKey;
+  // The five built-in fields use a FieldKey; custom campaign criteria use a
+  // generated string key, so this is widened to string.
+  key: string;
   label: string;
   value: string | null;
   confidence: number | null;
@@ -104,6 +106,17 @@ export type Campaign = {
 export const DEFAULT_CRITERIA: QualifyingCriterion[] = (
   Object.keys(FIELD_LABELS) as FieldKey[]
 ).map((key) => ({ key, label: FIELD_LABELS[key], custom: false }));
+
+/** Empty extraction fields for an arbitrary set of campaign criteria. */
+export function fieldsFromCriteria(criteria: QualifyingCriterion[]): ExtractedField[] {
+  return criteria.map((c) => ({
+    key: c.key,
+    label: c.label,
+    value: null,
+    confidence: null,
+    extractedAtMessageIndex: null,
+  }));
+}
 
 export function makeCriterionKey(label: string): string {
   const slug = label

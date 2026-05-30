@@ -2,10 +2,15 @@ import "server-only";
 import { hashPhone, maskPhone } from "./phone";
 import { runIntakeAgent } from "./anthropic";
 import { sendText, sendTemplate } from "./aisensy";
-import { createLead, updateLead, findLeadIdByPhoneHash } from "./airtable";
+import {
+  createLead,
+  updateLead,
+  findLeadIdByPhoneHash,
+  getActiveCampaignCriteria,
+} from "./airtable";
 import { getSession, saveSession, type ConversationSession } from "./sessions";
 import { flushLangfuse } from "./langfuse";
-import { emptyFields } from "@/lib/types";
+import { fieldsFromCriteria } from "@/lib/types";
 import { env } from "./env";
 import type { Message } from "@/lib/types";
 
@@ -32,12 +37,16 @@ export async function handleInboundMessage(
   const phoneMasked = maskPhone(phone);
   const now = timestamp || new Date().toISOString();
 
+  // Resolve the active campaign's qualifying criteria so the agent extracts
+  // exactly what the admin configured (defaults + any custom parameters).
+  const criteria = await getActiveCampaignCriteria();
+
   // ── Load or create session ───────────────────────────────────────────────
   let session: ConversationSession = getSession(sessionId) ?? {
     sessionId,
     airtableRecordId: null,
     messages: [],
-    extractedFields: emptyFields(),
+    extractedFields: fieldsFromCriteria(criteria),
     classification: "unclassified",
     complete: false,
     lastActivityAt: now,
@@ -71,6 +80,7 @@ export async function handleInboundMessage(
     history: session.messages,
     newUserMessage: text,
     existingFields: session.extractedFields,
+    criteria,
   });
 
   const agentMsg: Message = {

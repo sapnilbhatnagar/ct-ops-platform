@@ -1,7 +1,8 @@
 import "server-only";
 import Airtable from "airtable";
 import { env } from "./env";
-import type { Lead, Admin, ExtractedField } from "@/lib/types";
+import { DEFAULT_CRITERIA } from "@/lib/types";
+import type { Lead, Admin, ExtractedField, Campaign, QualifyingCriterion } from "@/lib/types";
 
 let _base: Airtable.Base | null = null;
 
@@ -213,4 +214,80 @@ export async function findAdminByEmail(email: string): Promise<Admin | null> {
     })
     .firstPage();
   return records[0] ? recordToAdmin(records[0]) : null;
+}
+
+// ── Campaigns (qualifying criteria) ───────────────────────────────────────────
+
+const CF = {
+  name: "Name",
+  criteriaJson: "Criteria (JSON)",
+  active: "Active",
+} as const;
+
+function campaignsTable() {
+  return base()("Campaigns");
+}
+
+function recordToCampaign(r: Airtable.Record<Airtable.FieldSet>): Campaign {
+  const criteria =
+    safeParseJson<QualifyingCriterion[]>(r.get(CF.criteriaJson) as string) ?? [...DEFAULT_CRITERIA];
+  return {
+    id: r.id,
+    name: (r.get(CF.name) as string) ?? "Untitled campaign",
+    criteria,
+  };
+}
+
+export async function listCampaigns(): Promise<{ campaigns: Campaign[]; activeId: string }> {
+  const records = await campaignsTable().select().all();
+  // Seed a default campaign on first use.
+  if (records.length === 0) {
+    const created = await campaignsTable().create({
+      [CF.name]: "Default campaign",
+      [CF.criteriaJson]: JSON.stringify(DEFAULT_CRITERIA),
+      [CF.active]: true,
+    });
+    return { campaigns: [recordToCampaign(created)], activeId: created.id };
+  }
+  const campaigns = records.map(recordToCampaign);
+  const activeRecord = records.find((r) => r.get(CF.active) === true) ?? records[0];
+  return { campaigns, activeId: activeRecord.id };
+}
+
+export async function getActiveCampaignCriteria(): Promise<QualifyingCriterion[]> {
+  if (!env.airtable.baseId()) return [...DEFAULT_CRITERIA];
+  try {
+    const { campaigns, activeId } = await listCampaigns();
+    return campaigns.find((c) => c.id === activeId)?.criteria ?? [...DEFAULT_CRITERIA];
+  } catch {
+    return [...DEFAULT_CRITERIA];
+  }
+}
+
+export async function createCampaign(name: string): Promise<Campaign> {
+  const record = await campaignsTable().create({
+    [CF.name]: name,
+    [CF.criteriaJson]: JSON.stringify(DEFAULT_CRITERIA),
+    [CF.active]: false,
+  });
+  return recordToCampaign(record);
+}
+
+export async function updateCampaignCriteria(
+  recordId: string,
+  criteria: QualifyingCriterion[],
+): Promise<void> {
+  await campaignsTable().update(recordId, { [CF.criteriaJson]: JSON.stringify(criteria) });
+}
+
+export async function setActiveCampaign(recordId: string): Promise<void> {
+  const records = await campaignsTable()
+    .select({ filterByFormula: `{${CF.active}} = 1` })
+    .all();
+  await Promise.all(
+    records
+      .filter((r) => r.id !== recordId)
+      .map((r) => campaignsTable().update(r.id, { [CF.active]: false })),
+  );
+  await campaignsTable().update(recordId, { [CF.active]: true });
 }

@@ -129,9 +129,8 @@ export function CriteriaConfigurator() {
       </div>
 
       <p className="text-[12px] leading-relaxed text-mute">
-        These parameters drive the Live extraction panel on the Intake screen. Custom parameters
-        appear there immediately; teaching the AI agent to extract them from new conversations is the
-        next backend step.
+        These parameters drive the Live extraction panel on the Intake screen, and the AI intake
+        agent extracts them from new WhatsApp conversations. Saved per campaign in Airtable.
       </p>
     </div>
   );

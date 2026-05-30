@@ -85,6 +85,21 @@ function commit(next: CampaignsState) {
   for (const s of _subs) s(next);
 }
 
+async function fetchServer(): Promise<CampaignsState | null> {
+  try {
+    const res = await fetch("/api/campaigns");
+    if (!res.ok) return null;
+    const data = (await res.json()) as CampaignsState;
+    return data?.campaigns?.length ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+function activeCriteria(state: CampaignsState) {
+  return state.campaigns.find((c) => c.id === state.activeId)?.criteria ?? [];
+}
+
 export function useCampaigns() {
   const [state, setState] = useState<CampaignsState>(load);
 
@@ -92,6 +107,10 @@ export function useCampaigns() {
     const onChange = (s: CampaignsState) => setState(s);
     _subs.add(onChange);
     setState(load());
+    // Hydrate from the server (Airtable); keep local state if it's unreachable.
+    fetchServer().then((s) => {
+      if (s) commit(s);
+    });
     return () => {
       _subs.delete(onChange);
     };
@@ -101,19 +120,43 @@ export function useCampaigns() {
 
   const setActive = useCallback((id: string) => {
     commit({ ..._state!, activeId: id });
+    fetch("/api/campaigns", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, setActive: true }),
+    }).catch(() => {});
   }, []);
 
   const create = useCallback((name: string) => {
-    const { campaigns, id } = addCampaign(_state!.campaigns, name);
-    commit({ campaigns, activeId: id });
+    const { campaigns } = addCampaign(_state!.campaigns, name);
+    commit({ ..._state!, campaigns });
+    fetch("/api/campaigns", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    })
+      .then(() => fetchServer())
+      .then((s) => {
+        if (s) commit(s);
+      })
+      .catch(() => {});
   }, []);
 
+  const persistCriteria = (next: CampaignsState) => {
+    commit(next);
+    fetch("/api/campaigns", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: next.activeId, criteria: activeCriteria(next) }),
+    }).catch(() => {});
+  };
+
   const addParam = useCallback((label: string) => {
-    commit({ ..._state!, campaigns: addCriterion(_state!.campaigns, _state!.activeId, label) });
+    persistCriteria({ ..._state!, campaigns: addCriterion(_state!.campaigns, _state!.activeId, label) });
   }, []);
 
   const removeParam = useCallback((key: string) => {
-    commit({ ..._state!, campaigns: removeCriterion(_state!.campaigns, _state!.activeId, key) });
+    persistCriteria({ ..._state!, campaigns: removeCriterion(_state!.campaigns, _state!.activeId, key) });
   }, []);
 
   return { campaigns: state.campaigns, activeCampaign, setActive, create, addParam, removeParam };

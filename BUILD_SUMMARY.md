@@ -2,7 +2,7 @@
 
 Plain-English status for anyone joining the project. Updated after every PR merge.
 
-**Last updated:** 2026-05-30 (after PR #12)
+**Last updated:** 2026-05-30 (after PR #13)
 **Live demo:** https://ct-ops-copilot.vercel.app (real Airtable + Claude; WhatsApp in sim mode).
 
 ---
@@ -16,7 +16,7 @@ A web console for Connecting Traveller (a travel business) that catches every Wh
 - **The AI intake pipeline.** A WhatsApp message comes in, Claude (Anthropic) chats with the lead, pulls out the five things we need (name, destination, dates, group size, budget), decides if they're hot/warm/cold, saves them to our Airtable database, and pings the sales team if it's hot. Every step is logged to Langfuse so we can see what the AI did. This runs today without a real WhatsApp connection using a "simulate message" test button, because the WhatsApp provider key isn't available yet.
 - **The Leads dashboard** reads the real Airtable data: a sortable, filterable table of every lead, with a side panel to read the conversation and reassign or re-tag a lead. Opening a lead now shows a one-line **AI summary and a suggested next action** (Claude, traced in Langfuse).
 - **The Intake screen** is now a working conversation workspace: live list of WhatsApp leads, the thread opens in the middle with a reply box (the operator answers from inside the platform; real send goes through the WhatsApp Business API once connected), and a Live extraction panel that checks the lead against the campaign's qualifying criteria.
-- **Qualifying criteria are configurable per campaign** from Settings (the admin adds parameters beyond the five defaults); the Intake extraction panel reflects them.
+- **Qualifying criteria are configurable per campaign** from Settings, stored in Airtable, and **the AI intake agent actually extracts them** from new WhatsApp conversations (its prompt is built from the campaign's criteria). Add a custom parameter like "Occasion" and a new lead's occasion is captured automatically.
 - **Trips re-engagement** now runs on the real backend: enter a new trip and it matches every stored lead, and Claude writes a personalised WhatsApp message for each match (traced in Langfuse). The "send" goes through sim mode until the WhatsApp key arrives.
 
 ## What's built and looks real, but runs on sample data
