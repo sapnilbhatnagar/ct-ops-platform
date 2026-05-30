@@ -36,6 +36,26 @@ export function startTurnTrace(args: {
 }
 
 /**
+ * Generic trace for any server operation (re-engagement, summaries, etc.).
+ * Use a descriptive name and tags so traces are filterable in the Langfuse UI.
+ */
+export function startTrace(args: {
+  name: string;
+  sessionId?: string;
+  userId?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}) {
+  return client().trace({
+    name: args.name,
+    sessionId: args.sessionId,
+    userId: args.userId,
+    tags: args.tags,
+    metadata: args.metadata,
+  });
+}
+
+/**
  * Ensures buffered events are flushed before serverless function shutdown.
  * Call at the end of every API route that uses Langfuse.
  */

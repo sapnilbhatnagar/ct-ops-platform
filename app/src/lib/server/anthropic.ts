@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { env } from "./env";
-import { startTurnTrace } from "./langfuse";
+import { startTurnTrace, startTrace } from "./langfuse";
 import type {
   Classification,
   ExtractedField,
@@ -179,3 +179,65 @@ export async function runIntakeAgent(input: IntakeAgentInput): Promise<IntakeAge
 
 // Re-export so other modules can build labels without importing two places.
 export { FIELD_LABELS };
+
+const REENGAGE_SYSTEM = `You write short, warm WhatsApp re-engagement messages for Connecting Traveller, a small-group travel company in India.
+
+You are messaging a past lead who enquired before but did not book, to tell them about a new trip that fits what they wanted.
+
+Rules:
+- One short paragraph, conversational, never salesy or robotic.
+- Open with their first name.
+- Reference what they originally wanted, then the new trip and why it fits.
+- End with a soft call to action (offer to hold a spot / share details).
+- Use the lead's likely language (English, Hindi, or Hinglish); default English.
+- Return ONLY the message text. No preamble, no quotes, no markdown.`;
+
+/**
+ * Generate a personalised re-engagement message for one lead + trip.
+ * Traced to Langfuse under the "reengagement" tag. Returns null on failure
+ * so the caller can fall back to a deterministic template.
+ */
+export async function personalizeReengagement(args: {
+  leadId: string;
+  prompt: string;
+}): Promise<string | null> {
+  const trace = startTrace({
+    name: "reengagement-message",
+    sessionId: args.leadId,
+    userId: args.leadId,
+    tags: ["reengagement"],
+  });
+  const generation = trace.generation({
+    name: "claude-reengagement",
+    model: env.anthropic.model(),
+    input: args.prompt,
+  });
+  try {
+    const response = await client().messages.create({
+      model: env.anthropic.model(),
+      system: REENGAGE_SYSTEM,
+      max_tokens: 300,
+      messages: [{ role: "user", content: args.prompt }],
+    });
+    const text = response.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("")
+      .trim();
+    generation.end({
+      output: text,
+      usage: {
+        input: response.usage.input_tokens,
+        output: response.usage.output_tokens,
+      },
+    });
+    return text || null;
+  } catch (e) {
+    generation.end({
+      output: e instanceof Error ? e.message : String(e),
+      level: "ERROR",
+      statusMessage: "reengagement generation failed",
+    });
+    return null;
+  }
+}

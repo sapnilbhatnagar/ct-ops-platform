@@ -1,31 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { TopBar } from "@/components/console-shell/topbar";
-import { useLeads } from "@/lib/hooks/use-leads";
 import { TripForm } from "./trip-form";
 import { MatchPreview } from "./match-preview";
-import { matchLeadsToTrip, type Trip, type MatchedLead } from "@/lib/trip-matching";
+import type { Trip, ReengagementMatch } from "@/lib/trip-matching";
 
-type Phase = "form" | "preview" | "sending" | "summary";
+type Phase = "form" | "matching" | "preview" | "sending" | "summary";
 
-export function TripsFlow({ sendDelayMs = 900 }: { sendDelayMs?: number }) {
-  const { leads } = useLeads();
+export function TripsFlow() {
   const [phase, setPhase] = useState<Phase>("form");
   const [trip, setTrip] = useState<Trip | null>(null);
-  const [matched, setMatched] = useState<MatchedLead[]>([]);
+  const [matches, setMatches] = useState<ReengagementMatch[]>([]);
+  const [summary, setSummary] = useState<{ sent: number; failed: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (phase !== "sending") return;
-    const t = setTimeout(() => setPhase("summary"), sendDelayMs);
-    return () => clearTimeout(t);
-  }, [phase, sendDelayMs]);
+  async function handleTripSubmit(t: Trip) {
+    setTrip(t);
+    setError(null);
+    setPhase("matching");
+    try {
+      const res = await fetch("/api/trips/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(t),
+      });
+      if (!res.ok) throw new Error(`match failed (${res.status})`);
+      setMatches((await res.json()) as ReengagementMatch[]);
+      setPhase("preview");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not match leads.");
+      setPhase("form");
+    }
+  }
+
+  async function handleSend() {
+    setPhase("sending");
+    try {
+      const res = await fetch("/api/trips/broadcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matches }),
+      });
+      if (!res.ok) throw new Error(`broadcast failed (${res.status})`);
+      setSummary((await res.json()) as { sent: number; failed: number });
+      setPhase("summary");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Broadcast failed.");
+      setPhase("preview");
+    }
+  }
 
   function reset() {
     setPhase("form");
     setTrip(null);
-    setMatched([]);
+    setMatches([]);
+    setSummary(null);
+    setError(null);
   }
 
   return (
@@ -41,22 +73,33 @@ export function TripsFlow({ sendDelayMs = 900 }: { sendDelayMs?: number }) {
                 personalised WhatsApp message for each one.
               </p>
             </div>
-            <TripForm
-              onSubmit={(t) => {
-                setTrip(t);
-                setMatched(matchLeadsToTrip(leads, t));
-                setPhase("preview");
-              }}
-            />
+            {error ? (
+              <div className="flex items-center gap-2 text-[12.5px] text-accent" data-testid="trip-flow-error">
+                <AlertCircle className="size-3.5" />
+                {error}
+              </div>
+            ) : null}
+            <TripForm onSubmit={handleTripSubmit} />
+          </div>
+        ) : null}
+
+        {phase === "matching" ? (
+          <div
+            data-testid="trip-matching"
+            className="flex flex-col items-center justify-center gap-3 py-24 text-center"
+          >
+            <Loader2 className="size-7 animate-spin text-accent" />
+            <div className="text-[14px] text-ink">Matching leads and drafting messages…</div>
+            <div className="text-[12px] text-mute">Claude is personalising each message</div>
           </div>
         ) : null}
 
         {phase === "preview" && trip ? (
           <MatchPreview
             trip={trip}
-            matched={matched}
+            matches={matches}
             onBack={() => setPhase("form")}
-            onSend={() => setPhase("sending")}
+            onSend={handleSend}
           />
         ) : null}
 
@@ -66,23 +109,18 @@ export function TripsFlow({ sendDelayMs = 900 }: { sendDelayMs?: number }) {
             className="flex flex-col items-center justify-center gap-3 py-24 text-center"
           >
             <Loader2 className="size-7 animate-spin text-accent" />
-            <div className="text-[14px] text-ink">Sending to {matched.length} leads…</div>
+            <div className="text-[14px] text-ink">Sending to {matches.length} leads…</div>
             <div className="text-[12px] text-mute">Respecting WhatsApp rate limits</div>
           </div>
         ) : null}
 
-        {phase === "summary" ? (
-          <div
-            data-testid="broadcast-summary"
-            className="mx-auto max-w-md py-20 text-center"
-          >
+        {phase === "summary" && summary ? (
+          <div data-testid="broadcast-summary" className="mx-auto max-w-md py-20 text-center">
             <CheckCircle2 className="mx-auto size-10 text-ok" />
-            <div className="mt-4 font-display text-[24px] leading-tight text-ink">
-              Broadcast sent
-            </div>
+            <div className="mt-4 font-display text-[24px] leading-tight text-ink">Broadcast sent</div>
             <p className="mt-2 text-[13px] text-mute">
-              <span className="tabular-nums text-ink">{matched.length}</span> messages delivered ·{" "}
-              <span className="tabular-nums">0</span> failed
+              <span className="tabular-nums text-ink">{summary.sent}</span> messages delivered ·{" "}
+              <span className="tabular-nums">{summary.failed}</span> failed
             </p>
             <p className="mt-1 text-[12px] text-mute">
               Replies flow back into the Intake console automatically.

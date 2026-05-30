@@ -16,6 +16,17 @@ export type MatchedLead = {
   reason: string;
 };
 
+/** A matched lead with its drafted message, as returned by /api/trips/match. */
+export type ReengagementMatch = {
+  id: string;
+  contactName: string | null;
+  phoneMasked: string;
+  classification: Classification;
+  reason: string;
+  message: string;
+  messageSource: "model" | "template";
+};
+
 function parseAmount(raw: string | null): number {
   if (!raw) return 0;
   const m = raw.replace(/,/g, "").match(/\d+(\.\d+)?/);
