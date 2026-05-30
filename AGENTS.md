@@ -8,6 +8,7 @@ Read `README.md` for orientation and `CONTRIBUTING.md` for the full workflow. Th
 - One feature, one branch, one PR. Branch names: `feat/ | fix/ | chore/ | docs/ | refactor/` + short kebab description.
 - Before opening a PR, from `app/`: `npm test` and `npm run build` must both pass.
 - A human reviews and merges. After merge, branch from a fresh `main` for the next feature.
+- **After every PR merge, update `BUILD_SUMMARY.md`** (plain-English status + "Last updated" line). It is the partner-facing status doc and must reflect `main`.
 
 ## How we build
 

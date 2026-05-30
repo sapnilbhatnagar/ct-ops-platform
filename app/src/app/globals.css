@@ -6,10 +6,13 @@
  */
 :root {
   --ink: #0E1014;
+  --ink-soft: #36383D;
   --paper: #FAFAF7;
+  --panel: #F2F0E9; /* second neutral layer: rails, side panels, table headers */
   --mute: #6B6B6B;
   --rule: #E8E6E0;
   --accent: #C8553D;
+  --accent-quiet: #F4E3DD; /* terracotta wash for selected/active surfaces */
   --warm: #E8A87C;
   --cool: #9DB4C0;
   --ok: #5A8F5A;
@@ -22,10 +25,13 @@
 
 @theme inline {
   --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
   --color-paper: var(--paper);
+  --color-panel: var(--panel);
   --color-mute: var(--mute);
   --color-rule: var(--rule);
   --color-accent: var(--accent);
+  --color-accent-quiet: var(--accent-quiet);
   --color-warm: var(--warm);
   --color-cool: var(--cool);
   --color-ok: var(--ok);
@@ -55,4 +61,21 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Skeleton loading shimmer. Conveys "content is coming" without a spinner. */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.skeleton {
+  background: var(--rule);
+  border-radius: 6px;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
 }

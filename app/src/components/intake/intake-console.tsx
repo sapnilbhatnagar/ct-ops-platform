@@ -60,7 +60,7 @@ export function IntakeConsole() {
     <>
       <TopBar section="Intake" />
       <div className="flex min-h-0 flex-1">
-        <div className="flex h-[calc(100dvh-3.5rem)] w-[320px] shrink-0 flex-col border-r border-rule bg-paper">
+        <div className="flex h-[calc(100dvh-3.5rem)] w-[320px] shrink-0 flex-col border-r border-rule bg-panel">
           <div className="border-b border-rule">
             <div className="flex items-baseline justify-between px-4 pt-3 pb-1">
               <div className="text-[11px] uppercase tracking-[0.18em] text-mute">

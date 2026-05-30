@@ -71,7 +71,7 @@ export function ExtractionPanel({
   return (
     <aside
       data-testid="extraction-panel"
-      className="flex h-full w-[340px] shrink-0 flex-col border-l border-rule bg-paper"
+      className="flex h-full w-[340px] shrink-0 flex-col border-l border-rule bg-panel"
     >
       <div className="border-b border-rule px-6 pt-6 pb-5">
         <div className="text-[11px] uppercase tracking-[0.18em] text-mute">

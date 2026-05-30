@@ -59,7 +59,7 @@ export function LeadTable({
   return (
     <div className="overflow-x-auto" data-testid="lead-table">
       <table className="w-full border-collapse text-left">
-        <thead>
+        <thead className="sticky top-0 z-10 bg-panel">
           <tr className="border-b border-rule">
             {COLUMNS.map((col) => {
               const sortable = col.key !== null;

@@ -2,7 +2,7 @@
 
 An internal ops console that captures every WhatsApp lead Connecting Traveller generates, qualifies it with an AI intake agent, and re-engages the ones that do not convert on the first trip.
 
-> **New partner? Start here, then read [`Build Plan.md`](./Build%20Plan.md) and [`SETUP.md`](./SETUP.md).** This README gets you oriented and running in about 15 minutes. The Build Plan is the source of truth for what we are building and in what order.
+> **New partner? Read [`BUILD_SUMMARY.md`](./BUILD_SUMMARY.md) first** for a 2-minute plain-English status, then this README, then [`Build Plan.md`](./Build%20Plan.md) and [`SETUP.md`](./SETUP.md). This README gets you oriented and running in about 15 minutes. The Build Plan is the source of truth for what we are building and in what order.
 
 ---
 
@@ -25,11 +25,14 @@ This is a **UI-first** build. Every module ships its visual layer on mock data f
 
 | Area | State |
 |---|---|
-| App shell + design system | Done. Operational sidebar: Intake, Leads, Trips, Community, Settings. |
-| Intake module (visual) | Done. Lead list with filters and pagination, conversation viewer, live AI extraction panel, classification badge with model-vs-user override, assignment controls, hot-lead alert. |
+| App shell + design system | Done. Operational sidebar, second-surface panel layer, skeleton loading states, terracotta accent system. |
+| Intake module (visual) | Done. Lead list with filters and pagination, conversation viewer, live AI extraction panel, classification override, assignment controls, hot-lead alert. |
+| Leads dashboard (visual) | Done. Sortable table, multi-select + destination + assignee + search filters, row-click detail drawer. |
+| Trips & re-engagement (visual) | Done. Trip form, matched-leads preview with drafted messages, broadcast confirm and summary. |
+| Community & referral (visual) | Done. Booked travellers grouped by trip with invite/welcome status, referral leaderboard. |
 | Settings / Admins (visual) | Done. Add and remove admins with validation. |
 | **Backend (intake)** | **Live and verified end to end.** A WhatsApp message (or the sim endpoint) runs the Claude Sonnet 4.6 intake agent, extracts the five fields, classifies hot/warm/cold, writes the lead to Airtable, fires a hot-lead notification, and traces every turn to Langfuse. Runs today in **sim mode** (no WhatsApp key needed); flip one env flag to go fully live. |
-| Leads / Trips / Community modules | Visual not started. Empty pages with narrative copy in place. |
+| Backend (leads / trips / community) | Not started. Trips and community run on mock data; leads dashboard reads live Airtable. |
 
 The intake module now reads and writes real Airtable data through `/api/leads` and `/api/admins`. The hooks (`useLeads`, `useAdmins`) fetch from those routes and fall back to mock data when Airtable is not configured, so the UI runs with or without credentials. WhatsApp send/receive is stubbed by `AISENSY_SIM_MODE` until the AISensy key arrives.
 
@@ -133,11 +136,11 @@ This runs the Claude agent, writes/updates the lead in Airtable, fires the hot-l
 | 0 | Visual foundation: scaffold, tokens, app shell | UI | Done |
 | 1a | Lead intake, visual | UI | Done |
 | 1b | Lead intake, backend (Claude + Airtable + Langfuse) | API | **Done and live in sim mode.** Anthropic + Airtable + Langfuse wired and verified end to end. Real WhatsApp send/receive waits on the AISensy key (sim mode bridges the gap). |
-| 2a | Leads dashboard, visual | UI | **Next** |
-| 2b | Leads dashboard, backend | API | Blocked on 2a |
-| 3a | Trips and re-engagement, visual | UI | Blocked on 2a |
-| 3b | Trips and re-engagement, backend | API | Blocked on 3a + 2b |
-| 4a | Community and referral, visual | UI | Blocked on 3a |
+| 2a | Leads dashboard, visual | UI | Done |
+| 2b | Leads dashboard, backend | API | **Next** (table already reads live Airtable) |
+| 3a | Trips and re-engagement, visual | UI | Done |
+| 3b | Trips and re-engagement, backend | API | Blocked on 2b + AISensy key |
+| 4a | Community and referral, visual | UI | Done |
 | 4b | Community and referral, backend | API | Blocked on 4a + 3b |
 | 5 | Settings / schema / conversation designer | UI + API | Blocked on 1b |
 | 6 | Observability (Langfuse), threaded into every backend phase | API | Cross-cutting |

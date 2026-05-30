@@ -7,6 +7,7 @@ import { useAdmins } from "@/lib/hooks/use-admins";
 import { LeadTable } from "./lead-table";
 import { LeadsFilterBar } from "./leads-filter-bar";
 import { LeadDetailDrawer } from "./lead-detail-drawer";
+import { SkeletonRows } from "@/components/ui/skeleton";
 import {
   filterLeads,
   sortLeads,
@@ -65,11 +66,8 @@ export function LeadsDashboard() {
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {loading ? (
-            <div
-              data-testid="leads-loading"
-              className="flex flex-1 items-center justify-center px-8 py-20 text-[13px] text-mute"
-            >
-              Loading leads…
+            <div data-testid="leads-loading" className="pt-4">
+              <SkeletonRows rows={8} />
             </div>
           ) : (
             <LeadTable
