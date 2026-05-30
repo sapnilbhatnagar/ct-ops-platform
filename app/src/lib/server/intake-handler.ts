@@ -126,9 +126,9 @@ export async function handleInboundMessage(
   }
 
   // ── Hot lead notification ────────────────────────────────────────────────
+  // Fire only on the transition into "hot" so the agent is pinged once.
   const wasHot = session.classification === "hot";
   const isHot = agentResult.classification === "hot";
-  const alreadyNotified = !!session.messages.find((m) => m.role === "agent"); // crude: notified if not first turn
 
   if (isHot && !wasHot && airtableRecordId) {
     const fields = agentResult.extractedFields;
@@ -150,7 +150,6 @@ export async function handleInboundMessage(
     if (notifyResult.ok && airtableRecordId && airtableConfigured) {
       await updateLead(airtableRecordId, { agentNotifiedAt: new Date().toISOString() });
     }
-    void alreadyNotified; // suppress unused warning
   }
 
   // ── Send reply ───────────────────────────────────────────────────────────
