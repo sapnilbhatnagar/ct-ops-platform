@@ -2,7 +2,7 @@
 
 Plain-English status for anyone joining the project. Updated after every PR merge.
 
-**Last updated:** 2026-05-30 (after PR #4)
+**Last updated:** 2026-05-30 (after PR #5)
 
 ---
 
@@ -14,21 +14,18 @@ A web console for Connecting Traveller (a travel business) that catches every Wh
 
 - **The AI intake pipeline.** A WhatsApp message comes in, Claude (Anthropic) chats with the lead, pulls out the five things we need (name, destination, dates, group size, budget), decides if they're hot/warm/cold, saves them to our Airtable database, and pings the sales team if it's hot. Every step is logged to Langfuse so we can see what the AI did. This runs today without a real WhatsApp connection using a "simulate message" test button, because the WhatsApp provider key isn't available yet.
 - **The Leads dashboard** reads the real Airtable data: a sortable, filterable table of every lead, with a side panel to read the conversation and reassign or re-tag a lead.
+- **Trips re-engagement** now runs on the real backend: enter a new trip and it matches every stored lead, and Claude writes a personalised WhatsApp message for each match (traced in Langfuse). The "send" goes through sim mode until the WhatsApp key arrives.
 
 ## What's built and looks real, but runs on sample data
 
-These screens are designed and working, waiting for their backend wiring:
-
-- **Trips & re-engagement:** enter a new trip, see which past leads match, preview a personalised message for each, and "send."
-- **Community & referrals:** booked travellers grouped by trip with invite/welcome status, plus a referral leaderboard.
+- **Community & referrals:** booked travellers grouped by trip with invite/welcome status, plus a referral leaderboard. Still on sample data.
 
 ## What's left
 
-1. **WhatsApp connection (AISensy):** we need the API key and a short check of their webhook format. Until then, sim mode covers it.
-2. **Leads backend polish** (Phase 2b): richer Airtable wiring.
-3. **Trips backend** (Phase 3b): real lead-matching and WhatsApp broadcast.
-4. **Community backend** (Phase 4b): real traveller and referral data.
-5. **Go live:** deploy to Vercel.
+1. **WhatsApp connection (AISensy):** we need the API key and a short check of their webhook format. Until then, sim mode covers both intake replies and trip broadcasts. (One open detail: real sending needs the lead's raw phone number, which we don't store yet for privacy; we'll resolve that with the AISensy wiring.)
+2. **Leads backend polish** (Phase 2b): richer Airtable wiring, conversation summaries.
+3. **Community backend** (Phase 4b): real traveller and referral data.
+4. **Go live:** deploy to Vercel.
 
 ## How we work
 

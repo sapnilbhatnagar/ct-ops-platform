@@ -32,7 +32,8 @@ This is a **UI-first** build. Every module ships its visual layer on mock data f
 | Community & referral (visual) | Done. Booked travellers grouped by trip with invite/welcome status, referral leaderboard. |
 | Settings / Admins (visual) | Done. Add and remove admins with validation. |
 | **Backend (intake)** | **Live and verified end to end.** A WhatsApp message (or the sim endpoint) runs the Claude Sonnet 4.6 intake agent, extracts the five fields, classifies hot/warm/cold, writes the lead to Airtable, fires a hot-lead notification, and traces every turn to Langfuse. Runs today in **sim mode** (no WhatsApp key needed); flip one env flag to go fully live. |
-| Backend (leads / trips / community) | Not started. Trips and community run on mock data; leads dashboard reads live Airtable. |
+| Backend (re-engagement) | **Live in sim mode.** `/api/trips/match` matches a trip against real stored leads and drafts a Claude-personalised message per lead (Langfuse-traced); `/api/trips/broadcast` sends via sim mode. |
+| Backend (leads enrichment / community) | Not started. Community runs on mock data; leads dashboard reads live Airtable. |
 
 The intake module now reads and writes real Airtable data through `/api/leads` and `/api/admins`. The hooks (`useLeads`, `useAdmins`) fetch from those routes and fall back to mock data when Airtable is not configured, so the UI runs with or without credentials. WhatsApp send/receive is stubbed by `AISENSY_SIM_MODE` until the AISensy key arrives.
 
@@ -139,7 +140,7 @@ This runs the Claude agent, writes/updates the lead in Airtable, fires the hot-l
 | 2a | Leads dashboard, visual | UI | Done |
 | 2b | Leads dashboard, backend | API | **Next** (table already reads live Airtable) |
 | 3a | Trips and re-engagement, visual | UI | Done |
-| 3b | Trips and re-engagement, backend | API | Blocked on 2b + AISensy key |
+| 3b | Trips and re-engagement, backend | API | **Done in sim mode.** Server matching + Claude messages + Langfuse traces live; broadcast send waits on the AISensy key (sim bridges it). |
 | 4a | Community and referral, visual | UI | Done |
 | 4b | Community and referral, backend | API | Blocked on 4a + 3b |
 | 5 | Settings / schema / conversation designer | UI + API | Blocked on 1b |
