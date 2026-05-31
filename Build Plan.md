@@ -875,6 +875,8 @@ Non-breaking: reducer tests untouched; criteria add/remove still PATCH `/api/cam
 
 ## Phase C2 (detailed build spec, test-first) — Lead routing + per-campaign intake
 
+**Status: SHIPPED 2026-05-31 (branch `feat/campaigns-c2-routing`). 115 tests, build clean. Verified live: 1-live auto-route + multi-live ask-to-choose, both persisted to Airtable.**
+
 Routing is a PURE function (every branch unit-tested); the handler/agent are thin orchestrators. Supersedes the single-active model. [C0-dep] needs `liveCampaigns()`, `Campaign.{status,destination}`, `Lead.campaignId`. Planned via Plan agent + /tdd, 2026-05-31.
 
 ### Public interfaces

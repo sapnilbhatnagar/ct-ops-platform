@@ -4,6 +4,7 @@ import type { ExtractedField, Classification, Message } from "@/lib/types";
 export type ConversationSession = {
   sessionId: string;
   airtableRecordId: string | null;
+  campaignId: string | null;
   messages: Message[];
   extractedFields: ExtractedField[];
   classification: Classification;

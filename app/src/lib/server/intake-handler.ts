@@ -2,12 +2,8 @@ import "server-only";
 import { hashPhone, maskPhone } from "./phone";
 import { runIntakeAgent } from "./anthropic";
 import { sendText, sendTemplate } from "./aisensy";
-import {
-  createLead,
-  updateLead,
-  findLeadIdByPhoneHash,
-  getActiveCampaignCriteria,
-} from "./airtable";
+import { createLead, updateLead, findLeadIdByPhoneHash, liveCampaigns } from "./airtable";
+import { resolveCampaign, needsAgentRouting, criteriaForLead } from "./lead-routing";
 import { getSession, saveSession, type ConversationSession } from "./sessions";
 import { flushLangfuse } from "./langfuse";
 import { fieldsFromCriteria } from "@/lib/types";
@@ -37,14 +33,22 @@ export async function handleInboundMessage(
   const phoneMasked = maskPhone(phone);
   const now = timestamp || new Date().toISOString();
 
-  // Resolve the active campaign's qualifying criteria so the agent extracts
-  // exactly what the admin configured (defaults + any custom parameters).
-  const criteria = await getActiveCampaignCriteria();
+  // ── Resolve the lead's campaign + its qualifying criteria ─────────────────
+  const live = await liveCampaigns();
+  const routable = live.map((c) => ({ key: c.id, name: c.name, destination: c.destination }));
+  const campaignsById = new Map(live.map((c) => [c.id, c]));
+
+  const existing = getSession(sessionId);
+  // Auto-route before the agent runs: keep an existing campaign, or take the
+  // single live one. Multi-campaign routing is decided by the agent below.
+  let campaignId = resolveCampaign(existing?.campaignId ?? null, routable, undefined).campaignId;
+  const criteria = criteriaForLead(campaignId, campaignsById);
 
   // ── Load or create session ───────────────────────────────────────────────
-  let session: ConversationSession = getSession(sessionId) ?? {
+  let session: ConversationSession = existing ?? {
     sessionId,
     airtableRecordId: null,
+    campaignId,
     messages: [],
     extractedFields: fieldsFromCriteria(criteria),
     classification: "unclassified",
@@ -81,7 +85,11 @@ export async function handleInboundMessage(
     newUserMessage: text,
     existingFields: session.extractedFields,
     criteria,
+    liveCampaigns: needsAgentRouting(campaignId, routable) ? routable : [],
   });
+
+  // Post-agent routing: on the multi-live path the agent picks the campaign.
+  campaignId = resolveCampaign(campaignId, routable, agentResult.campaign).campaignId;
 
   const agentMsg: Message = {
     id: `agent_${Date.now()}`,
@@ -115,7 +123,7 @@ export async function handleInboundMessage(
           classificationSource: "model",
           classificationReason: agentResult.classificationReason,
           assignedToId: null,
-          campaignId: null,
+          campaignId,
           bookingStatus: "enquiry",
           extractedFields: agentResult.extractedFields,
           messages: updatedMessages,
@@ -133,6 +141,7 @@ export async function handleInboundMessage(
         lastActivityAt: now,
         contactName: agentResult.extractedFields.find((f) => f.key === "name")?.value ?? null,
         status: agentResult.complete ? "complete" : "in_progress",
+        campaignId,
       });
     }
   }
@@ -171,6 +180,7 @@ export async function handleInboundMessage(
   saveSession({
     ...session,
     airtableRecordId,
+    campaignId,
     messages: updatedMessages,
     extractedFields: agentResult.extractedFields,
     classification: agentResult.classification,

@@ -38,13 +38,21 @@ export function LeadTable({
   sort,
   onSort,
   onSelect,
+  campaignNameById,
+  showCampaign = true,
 }: {
   leads: Lead[];
   admins: Admin[];
   sort: { key: SortKey; dir: SortDir };
   onSort: (key: SortKey) => void;
   onSelect: (id: string) => void;
+  campaignNameById?: Map<string, string>;
+  showCampaign?: boolean;
 }) {
+  const columns = showCampaign
+    ? [...COLUMNS.slice(0, 7), { key: null, label: "Campaign" }, ...COLUMNS.slice(7)]
+    : COLUMNS;
+
   if (leads.length === 0) {
     return (
       <div
@@ -61,7 +69,7 @@ export function LeadTable({
       <table className="w-full border-collapse text-left">
         <thead className="sticky top-0 z-10 bg-panel">
           <tr className="border-b border-rule">
-            {COLUMNS.map((col) => {
+            {columns.map((col) => {
               const sortable = col.key !== null;
               const active = sort.key === col.key;
               return (
@@ -124,6 +132,11 @@ export function LeadTable({
                 <td className="px-4 py-3">
                   <ClassificationBadge value={l.classification} size="sm" />
                 </td>
+                {showCampaign ? (
+                  <td className="px-4 py-3 text-[12.5px] text-mute">
+                    {(l.campaignId ? campaignNameById?.get(l.campaignId) : null) ?? "—"}
+                  </td>
+                ) : null}
                 <td className="px-4 py-3">
                   <span
                     className={cn("inline-flex items-center gap-1.5 text-[12px]", owner ? "text-ink" : "text-mute")}
