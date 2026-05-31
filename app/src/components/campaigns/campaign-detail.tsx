@@ -6,6 +6,7 @@ import { useCampaigns } from "@/lib/hooks/use-campaigns";
 import { CriteriaConfigurator } from "@/components/settings/criteria-configurator";
 import { CampaignOverviewForm } from "./campaign-overview-form";
 import { ItineraryEditor } from "./itinerary-editor";
+import { EnquiriesSection } from "./enquiries-section";
 import { SectionPlaceholder } from "./section-placeholder";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -60,7 +61,7 @@ export function CampaignDetail({ id }: { id: string }) {
             />
           </Section>
           <Section id="enquiries" title="Enquiries">
-            <SectionPlaceholder title="Leads this campaign sourced" phase="C2" />
+            <EnquiriesSection campaignId={id} />
           </Section>
           <Section id="reengagement" title="Re-engagement">
             <SectionPlaceholder title="Match and message this campaign's leads" phase="C3" />

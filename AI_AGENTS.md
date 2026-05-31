@@ -30,7 +30,7 @@ Chats with WhatsApp leads, extracts their intent (name, destination, dates, grou
 - **Model:** `env.anthropic.model()` (Claude 3.5 Sonnet)
 - **Max tokens:** 800
 - **Temperature:** Not set (default 1.0)
-- **Prompt strategy:** **Dynamic** — built from active campaign's configured criteria at runtime
+- **Prompt strategy:** **Dynamic** — built from the lead's routed campaign criteria at runtime (the five defaults until the lead is routed), plus a routing block when several campaigns are live
 
 ### System Prompt Template
 ```
@@ -88,7 +88,8 @@ Set complete=true only when every field is filled AND you have sent a closing me
   history: Message[];             // prior conversation messages
   newUserMessage: string;         // latest message from lead
   existingFields: ExtractedField[]; // already-extracted fields from prior turns
-  criteria: QualifyingCriterion[];  // active campaign's configured criteria
+  criteria: QualifyingCriterion[];  // the lead's ROUTED campaign criteria (defaults until routed)
+  liveCampaigns: { key; name; destination }[]; // live campaigns to route among (empty unless multi-live)
 }
 ```
 
@@ -100,6 +101,7 @@ Set complete=true only when every field is filled AND you have sent a closing me
   classification: "hot" | "warm" | "cold" | "unclassified";
   classificationReason: string;   // one sentence
   complete: boolean;              // true when all fields filled + closing sent
+  campaign: string | null;        // routed campaign key, or null if it asked the lead to choose
 }
 ```
 
@@ -345,6 +347,9 @@ After every change to agents (new agent, prompt tweak, model upgrade):
 ---
 
 ## Changelog
+
+### 2026-05-31 (Campaigns C2)
+- **Agent 1 (Intake):** Lead-to-campaign routing added. The agent receives the live campaigns and returns a `campaign` key. With one live campaign the handler auto-routes before the agent runs; with several, the agent infers the campaign from the conversation or asks the lead to choose (returns `campaign: null` and stays unrouted). Criteria are resolved per the lead's routed campaign (defaults until routed), retiring the single global "active campaign". Pure decision logic: `lib/server/lead-routing.ts` (`resolveCampaign`, `needsAgentRouting`, `isLiveKey`, `criteriaForLead`).
 
 ### 2026-05-30 (PR #13)
 - **Agent 1 (Intake):** Dynamic prompting wired. Prompt now built from active campaign's configured criteria at request time. Custom criteria (e.g., "Occasion") automatically extracted from new conversations.

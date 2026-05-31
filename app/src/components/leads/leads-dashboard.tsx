@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { TopBar } from "@/components/console-shell/topbar";
 import { useLeads } from "@/lib/hooks/use-leads";
 import { useAdmins } from "@/lib/hooks/use-admins";
+import { useCampaigns } from "@/lib/hooks/use-campaigns";
 import { LeadTable } from "./lead-table";
 import { LeadsFilterBar } from "./leads-filter-bar";
 import { LeadDetailDrawer } from "./lead-detail-drawer";
@@ -21,6 +22,11 @@ import {
 export function LeadsDashboard() {
   const { leads, loading, updateLead } = useLeads();
   const { admins } = useAdmins();
+  const { campaigns } = useCampaigns();
+  const campaignNameById = useMemo(
+    () => new Map(campaigns.map((c) => [c.id, c.name])),
+    [campaigns],
+  );
   const [filter, setFilter] = useState(emptyFilter);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "lastActivity",
@@ -69,6 +75,7 @@ export function LeadsDashboard() {
               onChange={setFilter}
               destinations={destinations}
               admins={admins}
+              campaigns={campaigns}
             />
 
             <div className="min-h-0 flex-1 overflow-y-auto">
@@ -83,6 +90,7 @@ export function LeadsDashboard() {
                   sort={sort}
                   onSort={handleSort}
                   onSelect={setSelectedId}
+                  campaignNameById={campaignNameById}
                 />
               )}
             </div>

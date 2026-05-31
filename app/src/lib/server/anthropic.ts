@@ -18,15 +18,27 @@ function client(): Anthropic {
   return _client;
 }
 
-function buildSystemPrompt(criteria: QualifyingCriterion[]): string {
+function buildSystemPrompt(
+  criteria: QualifyingCriterion[],
+  liveCampaigns: { key: string; name: string; destination: string }[],
+): string {
   const fieldList = criteria.map((c, i) => `${i + 1}. ${c.key} (${c.label})`).join("\n");
   const jsonShape = criteria.map((c) => `    "${c.key}": "string or null"`).join(",\n");
+  const routingBlock =
+    liveCampaigns.length > 1
+      ? `
+
+You are running several campaigns at once. Work out which one this lead is asking about:
+${liveCampaigns.map((c) => `- ${c.key}: ${c.name} (${c.destination})`).join("\n")}
+If it is clear, set "campaign" to the matching key. If you cannot tell, ask the lead which trip or destination they mean (list the options by name), and set "campaign" to null until they choose.`
+      : "";
   return `You are the intake agent for Connecting Traveller, a small-group travel company in India. You qualify inbound WhatsApp leads from Meta ads.
 
 Tone: warm, brief, professional, never robotic. Match the user's language (English, Hindi, or Hinglish). You are an AI, but do not announce that unless directly asked.
 
 Your job is to gather these qualifying fields in a natural conversation, not a form:
 ${fieldList}
+${routingBlock}
 
 Rules:
 - Ask at most one question per message. Never list multiple questions.
@@ -51,7 +63,8 @@ ${jsonShape}
   },
   "classification": "hot" | "warm" | "cold" | "unclassified",
   "classificationReason": "one sentence",
-  "complete": true | false
+  "complete": true | false,
+  "campaign": "campaign key from the list above, or null"
 }
 
 Use exactly the field keys listed above in extractedFields. Set complete=true only when every field is filled AND you have sent a closing message.`;
@@ -63,6 +76,7 @@ type IntakeAgentInput = {
   newUserMessage: string;
   existingFields: ExtractedField[];
   criteria: QualifyingCriterion[];
+  liveCampaigns: { key: string; name: string; destination: string }[];
 };
 
 type IntakeAgentOutput = {
@@ -71,6 +85,7 @@ type IntakeAgentOutput = {
   classification: Classification;
   classificationReason: string;
   complete: boolean;
+  campaign: string | null;
 };
 
 function mergeFields(
@@ -100,7 +115,7 @@ export async function runIntakeAgent(input: IntakeAgentInput): Promise<IntakeAge
     },
   });
 
-  const systemPrompt = buildSystemPrompt(input.criteria);
+  const systemPrompt = buildSystemPrompt(input.criteria, input.liveCampaigns);
 
   const generation = trace.generation({
     name: "claude-intake",
@@ -142,6 +157,7 @@ export async function runIntakeAgent(input: IntakeAgentInput): Promise<IntakeAge
     classification: Classification;
     classificationReason: string;
     complete: boolean;
+    campaign?: string | null;
   };
   try {
     parsed = JSON.parse(text);
@@ -177,6 +193,7 @@ export async function runIntakeAgent(input: IntakeAgentInput): Promise<IntakeAge
     classification: parsed.classification,
     classificationReason: parsed.classificationReason,
     complete: parsed.complete,
+    campaign: parsed.campaign ?? null,
   };
 }
 

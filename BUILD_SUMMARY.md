@@ -2,7 +2,7 @@
 
 Plain-English status for anyone joining the project. Updated after every PR merge.
 
-**Last updated:** 2026-05-31 (after Campaigns C1)
+**Last updated:** 2026-05-31 (after Campaigns C2)
 **Live demo:** https://ct-ops-copilot.vercel.app (real Airtable + Claude; WhatsApp in sim mode).
 
 ---
@@ -21,7 +21,7 @@ A web console for Connecting Traveller (a travel business) that catches every Wh
 
 ## The Campaigns module (in progress)
 
-We're reorganising the product around **campaigns** (for example "London Diwali 2026"). A campaign owns its trip details (destination, dates, price, itinerary, seats), the ads that bring leads in, its own qualifying questions, the enquiries it sources, and its re-engagement. This reframes "Trips" into "Campaigns" and folds the old "Community" idea in as each campaign's booked-traveller list. **The Campaigns console is now live:** a campaign list plus a detail screen where you curate the trip (overview, day-by-day itinerary, seats) and set its qualifying questions. Automatic lead-to-campaign routing and booking/seat tracking come next.
+We're reorganising the product around **campaigns** (for example "London Diwali 2026"). A campaign owns its trip details (destination, dates, price, itinerary, seats), the ads that bring leads in, its own qualifying questions, the enquiries it sources, and its re-engagement. This reframes "Trips" into "Campaigns" and folds the old "Community" idea in as each campaign's booked-traveller list. **The Campaigns console is now live:** a campaign list plus a detail screen where you curate the trip (overview, day-by-day itinerary, seats) and set its qualifying questions. **Inbound leads are now automatically routed to the right campaign:** when one campaign is live a new lead is attached to it; when several run at once the AI agent works out which trip the lead means, and politely asks them to pick when it cannot tell. Each campaign shows its own enquiries, and the Leads table has a campaign column and filter. Booking and seat tracking come next.
 
 ## What's left
 

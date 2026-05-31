@@ -19,11 +19,13 @@ export function LeadsFilterBar({
   onChange,
   destinations,
   admins,
+  campaigns,
 }: {
   filter: LeadsFilter;
   onChange: (next: LeadsFilter) => void;
   destinations: string[];
   admins: Admin[];
+  campaigns: { id: string; name: string }[];
 }) {
   function toggleClassification(c: Classification) {
     const next = new Set(filter.classifications);
@@ -85,6 +87,21 @@ export function LeadsFilterBar({
         {admins.map((a) => (
           <option key={a.id} value={a.id}>
             {a.name}
+          </option>
+        ))}
+      </select>
+
+      <select
+        data-testid="leads-campaign"
+        value={filter.campaignId}
+        onChange={(e) => onChange({ ...filter, campaignId: e.target.value })}
+        className="rounded-md border border-rule bg-paper px-2.5 py-1.5 text-[12px] text-ink focus:outline-none"
+      >
+        <option value="all">All campaigns</option>
+        <option value="none">Unrouted</option>
+        {campaigns.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
           </option>
         ))}
       </select>

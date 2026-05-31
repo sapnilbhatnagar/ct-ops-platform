@@ -28,6 +28,7 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<NextR
     classificationSource?: ClassificationSource;
     classificationReason?: string;
     assignedToId?: string | null;
+    campaignId?: string | null;
   };
   try {
     body = await req.json();

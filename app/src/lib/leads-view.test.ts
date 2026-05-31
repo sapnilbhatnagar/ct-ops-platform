@@ -60,6 +60,16 @@ describe("filterLeads", () => {
     expect(filterLeads(leads, f).map((l) => l.id).sort()).toEqual(["a", "b"]);
   });
 
+  it("filters by campaign id and by unrouted", () => {
+    const routed: Lead[] = [
+      { ...lead({ id: "x" }), campaignId: "c1" },
+      { ...lead({ id: "y" }), campaignId: "c2" },
+      { ...lead({ id: "z" }), campaignId: null },
+    ];
+    expect(filterLeads(routed, { ...emptyFilter(), campaignId: "c1" }).map((l) => l.id)).toEqual(["x"]);
+    expect(filterLeads(routed, { ...emptyFilter(), campaignId: "none" }).map((l) => l.id)).toEqual(["z"]);
+  });
+
   it("filters by a specific assignee id", () => {
     const f: LeadsFilter = { ...emptyFilter(), assignee: "admin_1" };
     expect(filterLeads(leads, f).map((l) => l.id)).toEqual(["c"]);

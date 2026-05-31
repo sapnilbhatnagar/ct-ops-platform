@@ -15,6 +15,7 @@ export type LeadsFilter = {
   classifications: Set<Classification>; // empty = all
   destination: string | "all";
   assignee: AssigneeFilter;
+  campaignId: string | "all" | "none";
   search: string;
 };
 
@@ -23,6 +24,7 @@ export function emptyFilter(): LeadsFilter {
     classifications: new Set<Classification>(),
     destination: "all",
     assignee: "all",
+    campaignId: "all",
     search: "",
   };
 }
@@ -56,6 +58,10 @@ export function filterLeads(leads: Lead[], filter: LeadsFilter): Lead[] {
     }
     if (filter.assignee === "unassigned" && l.assignedToId !== null) return false;
     if (filter.assignee !== "all" && filter.assignee !== "unassigned" && l.assignedToId !== filter.assignee) {
+      return false;
+    }
+    if (filter.campaignId === "none" && l.campaignId !== null) return false;
+    if (filter.campaignId !== "all" && filter.campaignId !== "none" && l.campaignId !== filter.campaignId) {
       return false;
     }
     if (search) {
