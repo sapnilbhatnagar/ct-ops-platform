@@ -28,7 +28,13 @@ export function CampaignsList() {
           <NewCampaignButton />
         </div>
 
-        {!loading && tiles.length === 0 ? (
+        {loading ? (
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="tile h-[68px] animate-pulse" />
+            ))}
+          </div>
+        ) : tiles.length === 0 ? (
           <div className="tile px-6 py-12 text-center">
             <div className="text-[14px] text-ink">No campaigns yet</div>
             <div className="mt-1 text-[12.5px] text-mute">

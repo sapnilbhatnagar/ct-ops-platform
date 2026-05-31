@@ -49,24 +49,29 @@ export function addCampaign(campaigns: Campaign[], name: string): { campaigns: C
 let _state: CampaignsState | null = null;
 const _subs = new Set<(s: CampaignsState) => void>();
 
-function load(): CampaignsState {
-  if (_state) return _state;
-  if (typeof window !== "undefined") {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as CampaignsState;
-        if (parsed.campaigns?.length) {
-          _state = parsed;
-          return _state;
-        }
-      }
-    } catch {
-      /* fall through to seed */
-    }
-  }
-  _state = seedState();
+/**
+ * Deterministic initial state for the first render: the same seed on the server
+ * and the client, so hydration matches. localStorage is read post-mount in the
+ * effect (via readStorage), never during render.
+ */
+function initialState(): CampaignsState {
+  if (!_state) _state = seedState();
   return _state;
+}
+
+/** Client-only: the state persisted from a previous session, or null. */
+function readStorage(): CampaignsState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as CampaignsState;
+      if (parsed.campaigns?.length) return parsed;
+    }
+  } catch {
+    /* ignore parse / access errors */
+  }
+  return null;
 }
 
 function commit(next: CampaignsState) {
@@ -93,14 +98,16 @@ async function fetchServer(): Promise<CampaignsState | null> {
 }
 
 export function useCampaigns() {
-  const [state, setState] = useState<CampaignsState>(load);
+  const [state, setState] = useState<CampaignsState>(initialState);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const onChange = (s: CampaignsState) => setState(s);
     _subs.add(onChange);
-    setState(load());
-    // Hydrate from the server (Airtable); keep local state if it's unreachable.
+    // Post-mount: hydrate from localStorage (kept out of render to match SSR).
+    const stored = readStorage();
+    if (stored) commit(stored);
+    // Then hydrate from the server (Airtable); keep local state if unreachable.
     fetchServer()
       .then((s) => {
         if (s) commit(s);
