@@ -348,7 +348,8 @@ After every change to agents (new agent, prompt tweak, model upgrade):
 
 ## Changelog
 
-### 2026-05-31 (Campaigns C2)
+### 2026-05-31 (Campaigns C2-C3)
+- **Agent 2 (Re-engagement):** now campaign-driven, fed by the Campaign record (destination/dates/price/inclusions) via `campaignToTrip`, triggered from the campaign's Re-engagement section (`/api/campaigns/[id]/match` + `/broadcast`). Message-prompt quality is a known follow-up (it currently second-guesses budget fit).
 - **Agent 1 (Intake):** Lead-to-campaign routing added. The agent receives the live campaigns and returns a `campaign` key. With one live campaign the handler auto-routes before the agent runs; with several, the agent infers the campaign from the conversation or asks the lead to choose (returns `campaign: null` and stays unrouted). Criteria are resolved per the lead's routed campaign (defaults until routed), retiring the single global "active campaign". Pure decision logic: `lib/server/lead-routing.ts` (`resolveCampaign`, `needsAgentRouting`, `isLiveKey`, `criteriaForLead`).
 
 ### 2026-05-30 (PR #13)

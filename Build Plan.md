@@ -951,6 +951,8 @@ Non-breaking: 88 tests green (routing additive); single-campaign case identical 
 
 ## Phase C3 (detailed build spec, test-first) — Campaign engagement + booked travellers
 
+**Status: SHIPPED 2026-05-31 (branch `feat/campaigns-c3-engagement`). 117 tests, build clean. Verified live: booking updates seats; campaign match + broadcast (sent 1/0). Completes Module C. Follow-up: tune the re-engagement message prompt.**
+
 Re-engagement becomes campaign-driven (trip data from the Campaign record, not a form); booking status drives seat inventory; booked travellers replace the deleted Community. [C0-dep] needs `Campaign.{destination,startDate,endDate,pricePerPerson,seatsTotal,seatsBooked,inclusions}`, `updateCampaign`, `Lead.{campaignId,bookingStatus}`. Self-planned (C3 agent hit a session limit), consistent with C0-C2 + the existing `trip-matching.ts`/`reengagement.ts`.
 
 ### Public interfaces

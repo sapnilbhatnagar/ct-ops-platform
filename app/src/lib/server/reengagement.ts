@@ -1,5 +1,5 @@
 import "server-only";
-import { listLeads } from "./airtable";
+import { listLeads, getCampaign } from "./airtable";
 import { personalizeReengagement } from "./anthropic";
 import { sendText } from "./aisensy";
 import { flushLangfuse } from "./langfuse";
@@ -7,6 +7,7 @@ import { env } from "./env";
 import {
   matchLeadsToTrip,
   generateMessage,
+  campaignToTrip,
   type Trip,
   type ReengagementMatch,
 } from "@/lib/trip-matching";
@@ -65,6 +66,13 @@ export async function buildMatches(trip: Trip): Promise<ReengagementMatch[]> {
 
   await flushLangfuse();
   return result;
+}
+
+/** Re-engagement matches for a campaign: leads whose destination/budget fit its trip. */
+export async function buildCampaignMatches(campaignId: string): Promise<ReengagementMatch[]> {
+  const campaign = await getCampaign(campaignId);
+  if (!campaign) return [];
+  return buildMatches(campaignToTrip(campaign));
 }
 
 /**

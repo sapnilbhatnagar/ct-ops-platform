@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { updateLead } from "@/lib/server/airtable";
 import { env } from "@/lib/server/env";
 import { MOCK_LEADS } from "@/lib/mock/leads";
-import type { Classification, ClassificationSource } from "@/lib/types";
+import type { Classification, ClassificationSource, BookingStatus } from "@/lib/types";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -29,6 +29,7 @@ export async function PATCH(req: NextRequest, { params }: Params): Promise<NextR
     classificationReason?: string;
     assignedToId?: string | null;
     campaignId?: string | null;
+    bookingStatus?: BookingStatus;
   };
   try {
     body = await req.json();

@@ -7,7 +7,7 @@ import { CriteriaConfigurator } from "@/components/settings/criteria-configurato
 import { CampaignOverviewForm } from "./campaign-overview-form";
 import { ItineraryEditor } from "./itinerary-editor";
 import { EnquiriesSection } from "./enquiries-section";
-import { SectionPlaceholder } from "./section-placeholder";
+import { CampaignReengagement } from "./campaign-reengagement";
 
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
@@ -61,10 +61,10 @@ export function CampaignDetail({ id }: { id: string }) {
             />
           </Section>
           <Section id="enquiries" title="Enquiries">
-            <EnquiriesSection campaignId={id} />
+            <EnquiriesSection campaign={campaign} onCampaignChange={(p) => updateCampaign(id, p)} />
           </Section>
           <Section id="reengagement" title="Re-engagement">
-            <SectionPlaceholder title="Match and message this campaign's leads" phase="C3" />
+            <CampaignReengagement campaign={campaign} />
           </Section>
         </div>
       </main>

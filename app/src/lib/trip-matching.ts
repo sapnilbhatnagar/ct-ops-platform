@@ -1,4 +1,4 @@
-import type { Lead, Classification } from "./types";
+import type { Lead, Classification, Campaign } from "./types";
 import { fieldValue } from "./leads-view";
 
 export type Trip = {
@@ -107,4 +107,17 @@ export function generateMessage(lead: Lead, trip: Trip): string {
     `Only ${trip.seats} seats — book by ${new Date(trip.offerDeadline).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}. ` +
     `Want me to hold a spot for you?`
   );
+}
+
+/** Adapt a campaign record into the Trip shape the matcher and message use. */
+export function campaignToTrip(c: Campaign): Trip {
+  return {
+    destination: c.destination,
+    startDate: c.startDate ?? "",
+    endDate: c.endDate ?? "",
+    pricePerPerson: c.pricePerPerson ?? 0,
+    seats: c.seatsTotal != null ? Math.max(0, c.seatsTotal - c.seatsBooked) : 0,
+    highlights: c.inclusions.join(", "),
+    offerDeadline: c.startDate ?? "",
+  };
 }
